@@ -1,9 +1,11 @@
 import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { motion } from 'framer-motion' // Assuming Framer Motion is installed for advanced animations
 import Login from './pages/Login'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import RoleProtectedRoute from './components/layout/RoleProtectedRoute'
 import Navbar from './components/layout/Navbar'
+import Sidebar from './components/layout/Sidebar'
 
 // Admin imports
 import * as Admin from './pages/Admin'
@@ -18,15 +20,51 @@ import * as HR from './pages/HR'
 import * as PayrollOfficer from './pages/PayrollOfficer'
 
 // Layout component for authenticated pages
-const DashboardLayout = ({ children, Sidebar }) => (
-  <div className="min-h-screen flex bg-slate-50">
-    <Sidebar />
-    <div className="flex-1 ml-60">
-      <Navbar />
-      <main className="mt-16 p-6">
-        {children}
-      </main>
+const DashboardLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => (
+  <div className="min-h-screen flex bg-gradient-to-br from-emerald-50 via-white to-teal-50 relative overflow-hidden">
+    {/* Animated Background Elements */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+      <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
     </div>
+
+    {/* Sidebar - Dynamic based on role */}
+    <SidebarComponent />
+    
+    {/* Main content area */}
+    <div className="flex-1 ml-60 relative z-10">
+      {/* Navbar - Fixed top */}
+      <Navbar />
+      
+      {/* Page content with top margin for navbar */}
+      <motion.main 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mt-16 p-6"
+      >
+        {children}
+      </motion.main>
+    </div>
+
+    <style>{`
+      @keyframes blob {
+        0% { transform: translate(0px, 0px) scale(1); }
+        33% { transform: translate(30px, -50px) scale(1.1); }
+        66% { transform: translate(-20px, 20px) scale(0.9); }
+        100% { transform: translate(0px, 0px) scale(1); }
+      }
+      .animate-blob {
+        animation: blob 7s infinite;
+      }
+      .animation-delay-2000 {
+        animation-delay: 2s;
+      }
+      .animation-delay-4000 {
+        animation-delay: 4s;
+      }
+    `}</style>
   </div>
 )
 
@@ -36,12 +74,22 @@ export default function App() {
       {/* Public Route */}
       <Route path="/login" element={<Login />} />
       
-      {/* Root redirect based on role */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      {/* Root redirect to dashboard */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
       {/* Admin Routes */}
       <Route
-        path="/admin/employees"
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Admin.Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees"
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
@@ -27,15 +28,36 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-white to-slate-100">
-      <div className="w-full max-w-md">
-        {/* Card Container */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8 border border-slate-200">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-100 via-white to-teal-100 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="w-full max-w-md relative z-10"
+      >
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 border-2 border-emerald-100/50"
+        >
           {/* Logo & Title */}
-          <div className="text-center mb-8">
-            <div className="inline-block p-3 bg-indigo-600 rounded-full mb-4">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
+          >
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="inline-block p-4 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full mb-4 shadow-lg"
+            >
               <svg
-                className="w-8 h-8 text-white"
+                className="w-10 h-10 text-white"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -47,64 +69,117 @@ export default function Login() {
                   d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
-            </div>
-            <h1 className="text-3xl font-bold text-slate-800">WorkZen</h1>
-            <p className="text-slate-600 mt-2">Sign in to your account</p>
-          </div>
+            </motion.div>
+            <motion.h1 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent"
+            >
+              WorkZen
+            </motion.h1>
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-gray-600 mt-2 text-lg"
+            >
+              Sign in to your account
+            </motion.p>
+          </motion.div>
 
           {/* Error Message */}
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
-            </div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                className="mb-6 p-4 bg-gradient-to-r from-red-500/10 to-pink-500/10 border-2 border-red-200/50 backdrop-blur-sm rounded-2xl shadow-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <motion.span 
+                    animate={{ y: [-2, 2, -2] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                    className="text-2xl"
+                  >
+                    ⚠️
+                  </motion.span>
+                  <p className="text-sm text-red-600 font-medium flex-1">{error}</p>
+                  <motion.button 
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => setError('')}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Login Id/ Email
+          <motion.form 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onSubmit={handleSubmit} 
+            className="space-y-6"
+          >
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="space-y-2"
+            >
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Login Id / Email
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.01, borderColor: '#10B981' }}
                 type="email"
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-6 py-4 border-2 border-emerald-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all bg-white/50 backdrop-blur-sm"
                 placeholder="admin@workzen.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-            </div>
+            </motion.div>
 
-            {/* Password Input */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+            <motion.div 
+              whileHover={{ y: -2 }}
+              className="space-y-2"
+            >
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Password
               </label>
-              <input
+              <motion.input
+                whileFocus={{ scale: 1.01, borderColor: '#10B981' }}
                 type="password"
                 required
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                className="w-full px-6 py-4 border-2 border-emerald-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all bg-white/50 backdrop-blur-sm"
                 placeholder="Enter your password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </div>
+            </motion.div>
 
-            {/* Submit Button */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className={`w-full py-3 px-4 rounded-lg font-semibold text-white transition-all ${
+              className={`w-full py-4 px-6 rounded-2xl font-bold text-white transition-all shadow-lg relative overflow-hidden ${
                 loading
-                  ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700 shadow-lg hover:shadow-xl'
+                  ? 'bg-emerald-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:shadow-xl'
               }`}
             >
               {loading ? (
-                <span className="flex items-center justify-center gap-2">
+                <motion.span 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex items-center justify-center gap-2"
+                >
                   <svg
-                    className="animate-spin h-5 w-5"
+                    className="animate-spin h-6 w-6"
                     fill="none"
                     viewBox="0 0 24 24"
                   >
@@ -123,21 +198,47 @@ export default function Login() {
                     />
                   </svg>
                   Signing in...
-                </span>
+                </motion.span>
               ) : (
-                'Sign In'
+                <span>Sign In</span>
               )}
-            </button>
-          </form>
+              {!loading && (
+                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+              )}
+            </motion.button>
+          </motion.form>
 
           {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-xs text-slate-500">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 text-center"
+          >
+            <p className="text-xs text-gray-500">
               WorkZen HRMS • Secure Admin Portal
             </p>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
+
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
   )
 }

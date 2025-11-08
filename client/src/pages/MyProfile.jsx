@@ -1,543 +1,277 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function MyProfile() {
-  const userName = localStorage.getItem('userName') || 'Admin User'
-  const userEmail = localStorage.getItem('userEmail') || 'admin@workzen.com'
-  
-  const [activeTab, setActiveTab] = useState('resume')
-  const [skills, setSkills] = useState(['JavaScript', 'React', 'Node.js', 'MongoDB'])
-  const [certifications, setCertifications] = useState(['AWS Certified', 'PMP Certified'])
-  const [newSkill, setNewSkill] = useState('')
-  const [newCertification, setNewCertification] = useState('')
+  const userName = localStorage.getItem("userName") || "Admin User";
+  const userEmail = localStorage.getItem("userEmail") || "admin@workzen.com";
 
+  const [activeTab, setActiveTab] = useState("resume");
+  const [skills, setSkills] = useState([
+    "JavaScript",
+    "React",
+    "Node.js",
+    "MongoDB",
+  ]);
+  const [certifications, setCertifications] = useState([
+    "AWS Certified",
+    "PMP Certified",
+  ]);
+  const [newSkill, setNewSkill] = useState("");
+  const [newCertification, setNewCertification] = useState("");
+
+  // Functions
   const addSkill = () => {
     if (newSkill.trim()) {
-      setSkills([...skills, newSkill.trim()])
-      setNewSkill('')
+      setSkills([...skills, newSkill.trim()]);
+      setNewSkill("");
     }
-  }
+  };
 
   const addCertification = () => {
     if (newCertification.trim()) {
-      setCertifications([...certifications, newCertification.trim()])
-      setNewCertification('')
+      setCertifications([...certifications, newCertification.trim()]);
+      setNewCertification("");
     }
-  }
+  };
 
   const removeSkill = (index) => {
-    setSkills(skills.filter((_, i) => i !== index))
-  }
+    setSkills(skills.filter((_, i) => i !== index));
+  };
 
   const removeCertification = (index) => {
-    setCertifications(certifications.filter((_, i) => i !== index))
-  }
+    setCertifications(certifications.filter((_, i) => i !== index));
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-800">My Profile</h1>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50 p-6 space-y-8 relative overflow-hidden">
+      {/* Animated Background */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300 rounded-full blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-300 rounded-full blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-300 rounded-full blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
-        <div className="flex items-start gap-6 mb-6">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-indigo-400 to-indigo-600 flex items-center justify-center">
-              <div className="w-28 h-28 rounded-full bg-slate-100 flex items-center justify-center text-3xl">
-                ✏️
-              </div>
+      {/* Header */}
+      <motion.section
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 rounded-3xl p-8 shadow-2xl"
+      >
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-20 translate-x-20 animate-pulse"></div>
+
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="relative z-10"
+        >
+          <h1 className="text-5xl font-bold text-white mb-2 bg-gradient-to-r from-white to-emerald-100 bg-clip-text text-transparent">
+            My Profile
+          </h1>
+          <p className="text-emerald-100 text-lg">
+            Manage your personal information and settings
+          </p>
+        </motion.div>
+      </motion.section>
+
+      {/* Profile Details */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-emerald-100/50 p-8 relative z-10"
+      >
+        {/* Profile Header */}
+        <div className="flex items-start gap-8 mb-8 pb-8 border-b-2 border-emerald-100/50">
+          <div className="relative group">
+            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-xl overflow-hidden relative">
+              <span className="text-5xl">👤</span>
+              <div className="absolute inset-0 bg-white/20 animate-ping rounded-full"></div>
             </div>
+            <button className="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-emerald-50 transition-all border-2 border-emerald-200">
+              ✏️
+            </button>
           </div>
 
           <div className="flex-1">
-            <h2 className="text-3xl font-bold text-slate-800 mb-2">{userName}</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-slate-500">Login ID</p>
-                <p className="text-slate-800">{userEmail}</p>
-              </div>
-              <div>
-                <p className="text-slate-500">Company</p>
-                <p className="text-slate-800">Company Name</p>
-              </div>
-              <div>
-                <p className="text-slate-500">Email</p>
-                <p className="text-slate-800">{userEmail}</p>
-              </div>
-              <div>
-                <p className="text-slate-500">Department</p>
-                <p className="text-slate-800">Administration</p>
-              </div>
-              <div>
-                <p className="text-slate-500">Mobile</p>
-                <p className="text-slate-800">+91 1234567890</p>
-              </div>
-              <div>
-                <p className="text-slate-500">Manager</p>
-                <p className="text-slate-800">CEO</p>
-              </div>
-              <div>
-                <p className="text-slate-500"></p>
-                <p className="text-slate-800"></p>
-              </div>
-              <div>
-                <p className="text-slate-500">Location</p>
-                <p className="text-slate-800">Mumbai, India</p>
-              </div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-3">{userName}</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[
+                { label: "Login ID", value: userEmail },
+                { label: "Company", value: "WorkZen HRMS" },
+                { label: "Email", value: userEmail },
+                { label: "Department", value: "Administration" },
+                { label: "Mobile", value: "+91 1234567890" },
+                { label: "Location", value: "Mumbai, India" },
+              ].map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 shadow-sm hover:shadow-md border border-emerald-100/50 transition-all"
+                >
+                  <p className="text-sm text-gray-600 mb-1 font-semibold">
+                    {item.label}
+                  </p>
+                  <p className="text-gray-800 font-medium">{item.value}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6 border-b border-slate-200">
-          <button
-            onClick={() => setActiveTab('resume')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'resume'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-600 hover:text-slate-800'
-            }`}
-          >
-            Resume
-          </button>
-          <button
-            onClick={() => setActiveTab('private')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'private'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-600 hover:text-slate-800'
-            }`}
-          >
-            Private Info
-          </button>
-          <button
-            onClick={() => setActiveTab('salary')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'salary'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-600 hover:text-slate-800'
-            }`}
-          >
-            Salary Info
-          </button>
-          <button
-            onClick={() => setActiveTab('security')}
-            className={`px-6 py-3 border-b-2 transition-colors ${
-              activeTab === 'security'
-                ? 'border-indigo-600 text-indigo-600'
-                : 'border-transparent text-slate-600 hover:text-slate-800'
-            }`}
-          >
-            Security
-          </button>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-8 overflow-x-auto">
+          {[
+            { id: "resume", label: "Resume", icon: "📄" },
+            { id: "private", label: "Private Info", icon: "🔒" },
+            { id: "salary", label: "Salary Info", icon: "💰" },
+            { id: "security", label: "Security", icon: "🛡️" },
+          ].map((tab) => (
+            <motion.button
+              key={tab.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 shadow-sm transition-all ${
+                activeTab === tab.id
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-lg"
+                  : "bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-200"
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+            </motion.button>
+          ))}
         </div>
 
-        {activeTab === 'resume' && (
-          <div className="grid grid-cols-12 gap-6">
-            <div className="col-span-7 space-y-6">
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-800 mb-4">About</h3>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                  Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                </p>
-                <h4 className="font-semibold text-slate-800 mb-2">What I love about my job</h4>
-                <p className="text-slate-600 text-sm leading-relaxed mb-4">
-                  Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                </p>
-                <h4 className="font-semibold text-slate-800 mb-2">My interests and hobbies</h4>
-                <p className="text-slate-600 text-sm leading-relaxed">
-                  Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-                </p>
+        {/* Tabs Content */}
+        <AnimatePresence mode="wait">
+          {activeTab === "resume" && (
+            <motion.div
+              key="resume"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              className="grid grid-cols-12 gap-8"
+            >
+              {/* About Me */}
+              <div className="col-span-12 lg:col-span-7 space-y-6">
+                <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-3xl p-8 border-2 border-emerald-100/50 shadow-lg">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-12 h-12 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl flex items-center justify-center shadow-md">
+                      ✨
+                    </div>
+                    <h3 className="text-2xl font-bold text-gray-800">About Me</h3>
+                  </div>
+                  <textarea
+                    className="w-full px-6 py-4 border-2 border-emerald-200 rounded-2xl bg-white/50 resize-none"
+                    rows="3"
+                    defaultValue="Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+                  />
+                  <button className="w-full px-6 py-3 mt-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl hover:from-emerald-700 hover:to-teal-700 font-semibold shadow-lg">
+                    Save Changes
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="col-span-5 space-y-6">
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-800 mb-4">Skills</h3>
-                <div className="space-y-2 mb-4">
+              {/* Skills & Certifications */}
+              <div className="col-span-12 lg:col-span-5 space-y-6">
+                {/* Skills */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border-2 border-emerald-200/50 shadow-lg">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    💪 Skills
+                  </h3>
                   {skills.map((skill, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white px-3 py-2 rounded border border-slate-200">
-                      <span className="text-sm text-slate-700">{skill}</span>
-                      <button onClick={() => removeSkill(index)} className="text-red-500 hover:text-red-600 font-bold text-lg">×</button>
+                    <div
+                      key={index}
+                      className="flex justify-between bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-3 rounded-2xl mb-3 border border-emerald-200/50"
+                    >
+                      <span>{skill}</span>
+                      <button
+                        onClick={() => removeSkill(index)}
+                        className="text-red-500 hover:text-red-600 font-bold text-xl"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      onKeyPress={(e) => e.key === "Enter" && addSkill()}
+                      placeholder="Add a skill..."
+                      className="flex-1 px-4 py-3 border-2 border-emerald-200 rounded-2xl bg-white/50"
+                    />
+                    <button
+                      onClick={addSkill}
+                      className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl"
+                    >
+                      + Add
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newSkill}
-                    onChange={(e) => setNewSkill(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addSkill()}
-                    placeholder="Add skill..."
-                    className="flex-1 bg-white border border-slate-300 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <button onClick={addSkill} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm">
-                    + Add Skills
-                  </button>
-                </div>
-              </div>
 
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <h3 className="text-xl font-semibold text-slate-800 mb-4">Certification</h3>
-                <div className="space-y-2 mb-4">
+                {/* Certifications */}
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 border-2 border-emerald-200/50 shadow-lg">
+                  <h3 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    🏆 Certifications
+                  </h3>
                   {certifications.map((cert, index) => (
-                    <div key={index} className="flex items-center justify-between bg-white px-3 py-2 rounded border border-slate-200">
-                      <span className="text-sm text-slate-700">{cert}</span>
-                      <button onClick={() => removeCertification(index)} className="text-red-500 hover:text-red-600 font-bold text-lg">×</button>
+                    <div
+                      key={index}
+                      className="flex justify-between bg-gradient-to-r from-emerald-50 to-teal-50 px-4 py-3 rounded-2xl mb-3 border border-emerald-200/50"
+                    >
+                      <span>{cert}</span>
+                      <button
+                        onClick={() => removeCertification(index)}
+                        className="text-red-500 hover:text-red-600 font-bold text-xl"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))}
-                </div>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newCertification}
-                    onChange={(e) => setNewCertification(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && addCertification()}
-                    placeholder="Add certification..."
-                    className="flex-1 bg-white border border-slate-300 px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                  <button onClick={addCertification} className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm">
-                    + Add Skills
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'salary' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <label className="text-sm text-slate-600 mb-2 block">Month Wage</label>
-                <div className="flex items-baseline gap-2">
-                  <input type="text" defaultValue="50000" className="text-2xl font-semibold text-slate-800 border-b-2 border-slate-300 bg-transparent focus:outline-none focus:border-indigo-600" />
-                  <span className="text-slate-600">/ Month</span>
-                </div>
-              </div>
-              
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <label className="text-sm text-slate-600 mb-2 block">No of working days in a week:</label>
-                <input type="text" className="text-lg font-semibold text-slate-800 border-b-2 border-slate-300 bg-transparent focus:outline-none focus:border-indigo-600 w-full" />
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <label className="text-sm text-slate-600 mb-2 block">Yearly wage</label>
-                <div className="flex items-baseline gap-2">
-                  <input type="text" defaultValue="600000" className="text-2xl font-semibold text-slate-800 border-b-2 border-slate-300 bg-transparent focus:outline-none focus:border-indigo-600" />
-                  <span className="text-slate-600">/ Yearly</span>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-                <label className="text-sm text-slate-600 mb-2 block">Break Time:</label>
-                <div className="flex items-baseline gap-2">
-                  <input type="text" className="text-lg font-semibold text-slate-800 border-b-2 border-slate-300 bg-transparent focus:outline-none focus:border-indigo-600" />
-                  <span className="text-slate-600">/hrs</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-800">Salary Components</h3>
-                
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-slate-800">Basic Salary</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="25000.00" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">₹ / month</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="50.00" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">Define Basic salary from company cost compute it based on monthly wages</p>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-slate-800">House Rent Allowance</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="12500.00" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">₹ / month</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="50.00" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">HRA provided to employees 50% of the basic salary</p>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-slate-800">Standard Allowance</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="4167.00" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">₹ / month</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="16.67" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">A standard allowance is a predetermined, fixed amount provided to employee as part of their salary</p>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-slate-800">Performance Bonus</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="2082.50" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">₹ / month</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="8.33" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">Variable amount paid during payroll. The value defined by the company and calculated as a % of the basic salary</p>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-slate-800">Leave Travel Allowance</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="2082.50" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">₹ / month</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="8.33" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">LTA is provided to employees to cover their travel expenses, and calculated as a % of the basic salary</p>
-                </div>
-
-                <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-slate-800">Fixed Allowance</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="2918.00" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">₹ / month</span>
-                      </div>
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="11.67" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500">Fixed allowance portion of wages is determined after calculating all salary components</p>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Provident Fund (PF) Contribution</h3>
-                  
-                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200 mb-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold text-slate-800">Employee</h4>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-baseline gap-1">
-                          <input type="text" defaultValue="3000.00" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                          <span className="text-sm text-slate-600">₹ / month</span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                          <input type="text" defaultValue="12.00" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                          <span className="text-sm text-slate-600">%</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">PF is calculated based on the basic salary</p>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold text-slate-800">Employer</h4>
-                      <div className="flex items-center gap-4">
-                        <div className="flex items-baseline gap-1">
-                          <input type="text" defaultValue="3000.00" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                          <span className="text-sm text-slate-600">₹ / month</span>
-                        </div>
-                        <div className="flex items-baseline gap-1">
-                          <input type="text" defaultValue="12.00" className="w-16 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                          <span className="text-sm text-slate-600">%</span>
-                        </div>
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">PF is calculated based on the basic salary</p>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-4">Tax Deductions</h3>
-                  
-                  <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-semibold text-slate-800">Professional Tax</h4>
-                      <div className="flex items-baseline gap-1">
-                        <input type="text" defaultValue="200.00" className="w-24 text-right border-b border-slate-300 bg-transparent focus:outline-none" />
-                        <span className="text-sm text-slate-600">₹ / month</span>
-                      </div>
-                    </div>
-                    <p className="text-xs text-slate-500">Professional Tax deducted from the Gross salary</p>
+                  <div className="flex gap-2 mt-2">
+                    <input
+                      type="text"
+                      value={newCertification}
+                      onChange={(e) => setNewCertification(e.target.value)}
+                      onKeyPress={(e) =>
+                        e.key === "Enter" && addCertification()
+                      }
+                      placeholder="Add certification..."
+                      className="flex-1 px-4 py-3 border-2 border-emerald-200 rounded-2xl bg-white/50"
+                    />
+                    <button
+                      onClick={addCertification}
+                      className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl"
+                    >
+                      + Add
+                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
-        {activeTab === 'private' && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              {/* Left Column - Personal Details */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Date of Birth</label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Residing Address</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Nationality</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Personal Email</label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Gender</label>
-                  <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Marital Status</label>
-                  <select className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <option value="">Select Status</option>
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Divorced">Divorced</option>
-                    <option value="Widowed">Widowed</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Date of Joining</label>
-                  <input
-                    type="date"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-
-              {/* Right Column - Bank Details */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Bank Details</h3>
-                
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Account Number</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Bank Name</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">IFSC Code</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">PAN No</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">UAN NO</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Emp Code</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <div className="flex justify-end pt-4">
-              <button className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-                Save Changes
-              </button>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'security' && (
-          <div className="bg-slate-50 rounded-lg p-6 border border-slate-200">
-            <h3 className="text-xl font-semibold text-slate-800 mb-4">Security Settings</h3>
-            <p className="text-slate-600">Security settings content will be displayed here.</p>
-          </div>
-        )}
-      </div>
+      <style>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
     </div>
-  )
+  );
 }
