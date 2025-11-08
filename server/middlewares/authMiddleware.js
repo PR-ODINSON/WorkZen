@@ -1,16 +1,26 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Verify JWT Token
 exports.verifyToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ success:false, message:'No token provided' });
+  
+  if (!authHeader) {
+    return res.status(401).json({ success: false, message: 'Not authorized' });
+  }
+  
   const token = authHeader.split(' ')[1];
+  
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Not authorized' });
+  }
+  
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secretkey');
-    req.user = decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Attach user ID to request
     next();
   } catch (err) {
-    return res.status(401).json({ success:false, message:'Invalid token' });
+    return res.status(401).json({ success: false, message: 'Not authorized' });
   }
 };
 

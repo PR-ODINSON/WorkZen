@@ -1,50 +1,84 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { success, error } = require('../utils/response');
+const generateToken = require('../utils/generateToken');
 
-exports.register = async (req, res) => {
+// Register Admin
+exports.registerAdmin = async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) return error(res, 'Missing fields', 400);
+    
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Missing fields' });
+    }
 
     const existing = await User.findOne({ email });
-    if (existing) return error(res, 'Email already registered', 400);
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'Email already registered' });
+    }
 
-    const usersCount = await User.countDocuments();
-    const role = usersCount === 0 ? 'admin' : 'employee'; // first user is admin
-
+    // Hash password
     const salt = await bcrypt.genSalt(10);
-    const passwordHash = await bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await User.create({ name, email, passwordHash, role });
-    return success(res, { message: 'User registered', user }, 201);
+    // Create user (Admin by default)
+    const user = await User.create({ 
+      name, 
+      email, 
+      password: hashedPassword,
+      role: 'Admin'
+    });
+
+    // Generate token
+    const token = generateToken(user._id);
+
+    return res.status(201).json({ 
+      success: true, 
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status
+      }
+    });
   } catch (err) {
     console.error(err);
-    return error(res, err.message);
+    return res.status(500).json({ success: false, message: err.message });
   }
 };
 
-exports.login = async (req, res) => {
+// Login User
+exports.loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    
     const user = await User.findOne({ email });
-    if (!user) return error(res, 'Invalid credentials', 401);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!isMatch) return error(res, 'Invalid credentials', 401);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    }
 
-    const payload = { id: user._id, role: user.role };
-    const token = jwt.sign(payload, process.env.JWT_SECRET || 'secretkey', { expiresIn: '7d' });
+    // Generate token
+    const token = generateToken(user._id);
 
-    return success(res, { message: 'Logged in', token, user });
+    return res.status(200).json({ 
+      success: true,
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status
+      }
+    });
   } catch (err) {
     console.error(err);
-    return error(res, err.message);
+    return res.status(500).json({ success: false, message: err.message });
   }
-};
-
-exports.logout = async (req, res) => {
-  // client-side can simply remove token; endpoint provided for symmetry
-  return success(res, { message: 'Logged out' });
 };
