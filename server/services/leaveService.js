@@ -120,6 +120,103 @@ class LeaveService {
 
     return { message: 'Leave request deleted successfully' };
   }
+
+  /**
+   * Get employee leaves
+   */
+  async getEmployeeLeaves(empId, query = {}) {
+    const { page = 1, limit = 100, status, year } = query;
+    
+    const filter = { empId };
+    if (status) filter.status = status;
+    
+    if (year) {
+      const startOfYear = new Date(year, 0, 1);
+      const endOfYear = new Date(year, 11, 31, 23, 59, 59);
+      filter.startDate = { $gte: startOfYear, $lte: endOfYear };
+    }
+
+    const skip = (page - 1) * limit;
+    const leaves = await Leave.find(filter)
+      .populate('empId', 'name email employeeId')
+      .populate('approvedBy', 'name email')
+      .limit(parseInt(limit))
+      .skip(skip)
+      .sort({ createdAt: -1 });
+
+    const total = await Leave.countDocuments(filter);
+
+    return {
+      leaves,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  /**
+   * Get leave balance for employee
+   */
+  async getLeaveBalance(empId) {
+    const currentYear = new Date().getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+    const endOfYear = new Date(currentYear, 11, 31, 23, 59, 59);
+
+    // Get all approved leaves for current year
+    const approvedLeaves = await Leave.find({
+      empId,
+      status: 'approved',
+      startDate: { $gte: startOfYear, $lte: endOfYear }
+    });
+
+    // Calculate used days by type
+    const paidDaysUsed = approvedLeaves
+      .filter(leave => leave.leaveType === 'Paid time Off')
+      .reduce((sum, leave) => sum + leave.numberOfDays, 0);
+
+    const sickDaysUsed = approvedLeaves
+      .filter(leave => leave.leaveType === 'Sick time off')
+      .reduce((sum, leave) => sum + leave.numberOfDays, 0);
+
+    // Standard allocations (can be made configurable later)
+    const paidTimeOffTotal = 24;
+    const sickTimeOffTotal = 7;
+
+    return {
+      paidTimeOff: {
+        total: paidTimeOffTotal,
+        used: paidDaysUsed,
+        available: paidTimeOffTotal - paidDaysUsed
+      },
+      sickTimeOff: {
+        total: sickTimeOffTotal,
+        used: sickDaysUsed,
+        available: sickTimeOffTotal - sickDaysUsed
+      }
+    };
+  }
+
+  /**
+   * Cancel leave request (only pending leaves)
+   */
+  async cancelLeave(id, empId) {
+    const leave = await Leave.findOne({ _id: id, empId });
+    
+    if (!leave) {
+      throw new Error('Leave request not found');
+    }
+
+    if (leave.status !== 'pending') {
+      throw new Error('Only pending leave requests can be cancelled');
+    }
+
+    await Leave.findByIdAndDelete(id);
+    
+    return { message: 'Leave request cancelled successfully' };
+  }
 }
 
 module.exports = new LeaveService();
