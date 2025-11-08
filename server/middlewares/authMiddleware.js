@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Employee = require('../models/Employee');
 
 // Verify JWT Token
 exports.verifyToken = async (req, res, next) => {
@@ -18,6 +19,14 @@ exports.verifyToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.user = decoded; // Attach user ID to request
+    
+    // Find employee record for this user (if exists)
+    const employee = await Employee.findOne({ userId: decoded.id });
+    if (employee) {
+      req.user.empId = employee._id;
+      req.user.employeeId = employee.employeeId;
+    }
+    
     next();
   } catch (err) {
     return res.status(401).json({ success: false, message: 'Not authorized' });

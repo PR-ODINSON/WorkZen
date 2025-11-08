@@ -78,6 +78,7 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
 
+<<<<<<< HEAD
       {/* ------------------ Admin Routes ------------------ */}
       {[
         { path: '/admin/dashboard', page: <Admin.Dashboard /> },
@@ -100,6 +101,93 @@ export default function App() {
           }
         />
       ))}
+=======
+      {/* Admin Routes */}
+      <Route
+        path="/admin/employees"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.Employees />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/attendance"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.Attendance />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/timeoff"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.TimeOff />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/payroll"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.Payroll />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.Reports />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/profile"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.MyProfile />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/settings"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.Settings />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+>>>>>>> 3e8a83e083def91375bb34d1124df76a643c923b
 
       {/* ------------------ HR Routes ------------------ */}
       {[

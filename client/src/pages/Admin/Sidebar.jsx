@@ -7,7 +7,7 @@ import {
   FaUmbrellaBeach,
   FaMoneyCheckAlt,
   FaChartLine,
-  FaUserCircle,
+  FaCog,
   FaWarehouse,
   FaHome,
 } from 'react-icons/fa';
@@ -23,7 +23,7 @@ const AdminSidebar = () => {
     { label: 'Time Off', to: '/admin/timeoff', icon: <FaUmbrellaBeach /> },
     { label: 'Payroll', to: '/admin/payroll', icon: <FaMoneyCheckAlt /> },
     { label: 'Reports', to: '/admin/reports', icon: <FaChartLine /> },
-    { label: 'My Profile', to: '/admin/profile', icon: <FaUserCircle /> },
+    { label: 'Settings', to: '/admin/settings', icon: <FaCog /> },
   ];
 
   const sidebarVariants = {
