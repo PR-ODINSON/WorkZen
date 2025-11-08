@@ -31,8 +31,11 @@ exports.checkIn = async (req, res) => {
   try {
     const empId = req.user.empId; // Get employee ID from verified token
     
+    console.log('Check-in request from user:', req.user);
+    console.log('Employee ID:', empId);
+    
     if (!empId) {
-      return error(res, 'Employee profile not found', 404);
+      return error(res, 'Employee profile not found. Please contact admin to create your employee profile.', 404);
     }
 
     const attendance = await attendanceService.checkIn(empId);

@@ -264,6 +264,39 @@ class AttendanceService {
 
     return attendance;
   }
+
+  /**
+   * Get attendance records for a specific employee
+   */
+  async getEmployeeAttendance(empId, query = {}) {
+    const { startDate, endDate, limit = 100 } = query;
+    
+    const filter = { empId };
+    
+    if (startDate || endDate) {
+      filter.date = {};
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        filter.date.$gte = start;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.date.$lte = end;
+      }
+    }
+
+    const attendance = await Attendance.find(filter)
+      .populate('empId', 'name email employeeId')
+      .limit(parseInt(limit))
+      .sort({ date: -1 });
+
+    return {
+      attendance,
+      total: attendance.length
+    };
+  }
 }
 
 module.exports = new AttendanceService();
