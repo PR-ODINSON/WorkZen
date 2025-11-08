@@ -118,7 +118,7 @@ export default function Employees() {
     )
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50 p-6 rounded-3xl space-y-8">
+    <div className="min-h-screen rounded-3xl space-y-8">
       {/* Header Section */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6">
         <div className="relative z-10 flex items-center justify-between">
@@ -146,28 +146,6 @@ export default function Employees() {
           {error}
         </div>
       )}
-
-      {/* Stats Section */}
-      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Total Employees', value: stats.total, color: 'blue' },
-          { label: 'Present Today', value: stats.present, color: 'green' },
-          { label: 'On Leave', value: stats.onLeave, color: 'indigo' },
-          { label: 'Absent', value: stats.absent, color: 'amber' },
-        ].map((s, i) => (
-          <div
-            key={i}
-            className={`bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-md p-5 hover:scale-[1.02] transition-transform duration-300`}
-          >
-            <p className="text-sm text-gray-500">{s.label}</p>
-            <p
-              className={`text-3xl font-bold text-${s.color}-600 mt-1`}
-            >
-              {s.value}
-            </p>
-          </div>
-        ))}
-      </section>
 
       {/* Filters Section */}
       <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6">

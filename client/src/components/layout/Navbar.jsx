@@ -125,7 +125,7 @@ const Navbar = () => {
   }
 
   return (
-    <header className=" bg-[#fff0]  fixed top-0 right-0 left-0 z-30 flex items-center  w-full justify-between px-6">
+    <header className=" bg-white fixed top-0 right-0 left-0 z-30 flex items-center  w-full justify-between px-6 py-2">
       {/* Left side - Title */}
       <div className="flex items-center">
       </div>
@@ -199,9 +199,9 @@ const Navbar = () => {
 
         {/* Profile Button */}
         <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="flex items-center gap-3 hover:bg-slate-100 rounded-lg px-3 py-2 transition-colors"
+          <div
+            
+            className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors"
           >
             {/* Avatar Circle with Attendance Indicator */}
             <div className="relative">
@@ -223,6 +223,7 @@ const Navbar = () => {
               className={`w-4 h-4 text-slate-600 transition-transform ${
                 isDropdownOpen ? 'rotate-180' : ''
               }`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -234,7 +235,7 @@ const Navbar = () => {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-          </button>
+          </div>
 
           {/* Dropdown Menu */}
           {isDropdownOpen && (

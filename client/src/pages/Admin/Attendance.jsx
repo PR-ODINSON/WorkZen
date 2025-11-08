@@ -180,7 +180,7 @@ export default function Attendance() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50 p-6 rounded-3xl space-y-8">
+    <div className="min-h-screen rounded-3xl space-y-8">
       {/* Header Section */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6">
         <div className="relative z-10 flex items-center justify-between">

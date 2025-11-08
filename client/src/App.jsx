@@ -22,12 +22,10 @@ import * as PayrollOfficer from './pages/PayrollOfficer'
 const DashboardLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => {
   const { isCollapsed } = useSidebar()
 
-  const marginLeft = isCollapsed ? 'ml-20' : 'ml-64' // Adjusts dynamically
+  const marginLeft = isCollapsed ? 'ml-20' : 'ml-64'
 
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-emerald-50 via-white to-teal-50 relative overflow-hidden">
-  
-
+    <div className="min-h-screen flex bg-white relative overflow-hidden">
       {/* Sidebar */}
       <SidebarComponent />
 
