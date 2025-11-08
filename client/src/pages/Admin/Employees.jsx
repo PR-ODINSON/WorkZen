@@ -60,22 +60,13 @@ export default function Employees() {
           alert('Employee updated successfully!')
         }
       } else {
-        const userData = {
-          name: formData.name,
-          email: formData.email,
-          password: 'Welcome@123',
-          role: 'employee',
-        }
-
-        const userResponse = await api.post('/auth/register', userData)
-        if (userResponse.data.success) {
-          const employeeData = { ...formData, userId: userResponse.data.user._id }
-          const empResponse = await api.post('/admin/employees', employeeData)
-          if (empResponse.data.success) {
-            await fetchEmployees()
-            setIsFormModalOpen(false)
-            alert(`Employee added! Default password: Welcome@123`)
-          }
+        // Create new employee - backend will create both user and employee
+        const response = await api.post('/admin/employees', formData)
+        if (response.data.success) {
+          await fetchEmployees()
+          setIsFormModalOpen(false)
+          const loginId = response.data.loginId
+          alert(`Employee added successfully!\n\nLogin ID: ${loginId}\nDefault Password: Welcome@123\n\nPlease share these credentials with the employee.`)
         }
       }
     } catch (err) {
