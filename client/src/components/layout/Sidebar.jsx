@@ -15,6 +15,7 @@ import {
 const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
+  // 🔹 Same routes and logic as WorkZen
   const links = [
     { label: 'Dashboard', to: '/dashboard', icon: <FaHome /> },
     { label: 'Employees', to: '/employees', icon: <FaUsers /> },
@@ -25,8 +26,9 @@ const Sidebar = () => {
     { label: 'Settings', to: '/settings', icon: <FaCog /> },
   ]
 
+  // Animation Variants (same as WorkZen)
   const sidebarVariants = {
-    expanded: { width: '16rem' },
+    expanded: { width: '20rem' },
     collapsed: { width: '5rem' },
   }
 
@@ -41,19 +43,19 @@ const Sidebar = () => {
       animate={isCollapsed ? 'collapsed' : 'expanded'}
       variants={sidebarVariants}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
+      // 💚 TeleMedicine Design Look
       className="bg-gradient-to-b from-white via-emerald-50 to-green-50 text-gray-800 min-h-screen flex flex-col fixed left-0 top-0 bottom-0 z-40 shadow-xl border-r border-emerald-100 overflow-hidden"
     >
-      {/* Logo Section */}
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-5 border-b border-emerald-100 relative z-10 flex items-center justify-between"
+        className="p-6 border-b border-emerald-100 flex items-center justify-between"
       >
         <motion.div
           className="flex items-center gap-3 overflow-hidden"
           variants={textVariants}
           animate={isCollapsed ? 'collapsed' : 'expanded'}
-          transition={{ duration: 0.3 }}
         >
           <motion.div
             whileHover={{ scale: 1.05 }}
@@ -67,23 +69,13 @@ const Sidebar = () => {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: 10 }}
-                className="space-y-1"
               >
-                <motion.h1
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-lg font-bold bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent"
-                >
+                <h1 className="text-2xl font-bold text-emerald-700">
                   WorkZen
-                </motion.h1>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-xs text-emerald-600"
-                >
+                </h1>
+                <p className="text-xs text-emerald-600 font-medium">
                   HRMS
-                </motion.p>
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -106,13 +98,13 @@ const Sidebar = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="flex-1 p-4 relative z-10"
+        className="flex-1 p-6"
       >
         <motion.ul
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ staggerChildren: 0.05, delay: 0.3 }}
-          className="space-y-2"
+          className="space-y-3"
         >
           {links.map(({ label, to, icon }, index) => (
             <motion.li
@@ -124,10 +116,10 @@ const Sidebar = () => {
               <NavLink to={to}>
                 {({ isActive }) => (
                   <div
-                    className={`group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 relative overflow-hidden ${
+                    className={`group flex items-center gap-3 px-5 py-3 rounded-xl transition-all duration-300 relative ${
                       isActive
-                        ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg scale-[1.02]'
-                        : 'text-gray-700 hover:bg-emerald-100 hover:text-emerald-700 hover:shadow-md'
+                        ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-md'
+                        : 'text-gray-700 hover:bg-emerald-100 hover:text-emerald-700 hover:shadow-sm'
                     }`}
                   >
                     <motion.span
@@ -151,12 +143,6 @@ const Sidebar = () => {
                         </motion.span>
                       )}
                     </AnimatePresence>
-
-                    {!isActive && (
-                      <motion.div
-                        className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-emerald-400 to-teal-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                      />
-                    )}
                   </div>
                 )}
               </NavLink>
@@ -172,15 +158,22 @@ const Sidebar = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="p-4 border-t border-emerald-100 relative z-10 bg-emerald-50"
+            className="p-5 border-t border-emerald-100 bg-emerald-50"
           >
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-xs text-emerald-600 text-center font-medium"
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              onClick={() => alert('Logout clicked')}
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 hover:bg-red-100 hover:text-red-700 transition-all duration-300 border border-red-200 hover:border-red-300"
             >
+              <span className="text-lg">
+                <FaCog />
+              </span>
+              <span className="font-semibold text-sm">Logout</span>
+            </motion.button>
+
+            <p className="text-xs text-emerald-600 text-center mt-3 font-medium">
               WorkZen HRMS v1.0
-            </motion.p>
+            </p>
           </motion.div>
         )}
       </AnimatePresence>

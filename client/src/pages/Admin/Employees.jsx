@@ -3,6 +3,7 @@ import EmployeeCard from '../../components/ui/EmployeeCard'
 import Modal from '../../components/ui/Modal'
 import EmployeeForm from '../../components/forms/EmployeeForm'
 import api from '../../api'
+import { FaUsers, FaSearch, FaBuilding, FaPlus } from 'react-icons/fa'
 
 export default function Employees() {
   const [employees, setEmployees] = useState([])
@@ -16,7 +17,6 @@ export default function Employees() {
   const [departmentFilter, setDepartmentFilter] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
 
-  // Fetch employees from API
   useEffect(() => {
     fetchEmployees()
   }, [])
@@ -25,9 +25,7 @@ export default function Employees() {
     try {
       setLoading(true)
       const response = await api.get('/admin/employees')
-      if (response.data.success) {
-        setEmployees(response.data.employees || [])
-      }
+      if (response.data.success) setEmployees(response.data.employees || [])
     } catch (err) {
       console.error('Error fetching employees:', err)
       setError(err.response?.data?.message || 'Failed to fetch employees')
@@ -41,11 +39,6 @@ export default function Employees() {
     setIsViewModalOpen(true)
   }
 
-  const handleCloseViewModal = () => {
-    setIsViewModalOpen(false)
-    setSelectedEmployee(null)
-  }
-
   const handleAddEmployee = () => {
     setEditingEmployee(null)
     setIsFormModalOpen(true)
@@ -57,42 +50,31 @@ export default function Employees() {
     setIsViewModalOpen(false)
   }
 
-  const handleCloseFormModal = () => {
-    setIsFormModalOpen(false)
-    setEditingEmployee(null)
-  }
-
   const handleSubmitEmployee = async (formData) => {
     try {
       if (editingEmployee) {
-        // Update existing employee
         const response = await api.put(`/admin/employees/${editingEmployee._id}`, formData)
         if (response.data.success) {
           await fetchEmployees()
-          handleCloseFormModal()
+          setIsFormModalOpen(false)
           alert('Employee updated successfully!')
         }
       } else {
-        // Create new employee - first create user, then employee
         const userData = {
           name: formData.name,
           email: formData.email,
-          password: 'Welcome@123', // Default password
-          role: 'employee'
+          password: 'Welcome@123',
+          role: 'employee',
         }
-        
+
         const userResponse = await api.post('/auth/register', userData)
         if (userResponse.data.success) {
-          const employeeData = {
-            ...formData,
-            userId: userResponse.data.user._id
-          }
-          
+          const employeeData = { ...formData, userId: userResponse.data.user._id }
           const empResponse = await api.post('/admin/employees', employeeData)
           if (empResponse.data.success) {
             await fetchEmployees()
-            handleCloseFormModal()
-            alert(`Employee added successfully! Default password: Welcome@123`)
+            setIsFormModalOpen(false)
+            alert(`Employee added! Default password: Welcome@123`)
           }
         }
       }
@@ -108,7 +90,7 @@ export default function Employees() {
         const response = await api.delete(`/admin/employees/${employeeId}`)
         if (response.data.success) {
           await fetchEmployees()
-          handleCloseViewModal()
+          setIsViewModalOpen(false)
           alert('Employee deleted successfully!')
         }
       } catch (err) {
@@ -118,93 +100,102 @@ export default function Employees() {
     }
   }
 
-  // Filter employees
-  const filteredEmployees = employees.filter(employee => {
-    const matchesSearch = employee.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         employee.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEmployees = employees.filter((employee) => {
+    const matchesSearch =
+      employee.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.email?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesDepartment = !departmentFilter || employee.department === departmentFilter
     const matchesStatus = !statusFilter || employee.status === statusFilter
-    
     return matchesSearch && matchesDepartment && matchesStatus
   })
 
-  // Calculate statistics
   const stats = {
     total: employees.length,
-    present: employees.filter(e => e.status === 'Present').length,
-    onLeave: employees.filter(e => e.status === 'On Leave').length,
-    absent: employees.filter(e => e.status === 'Absent').length,
+    present: employees.filter((e) => e.status === 'Present').length,
+    onLeave: employees.filter((e) => e.status === 'On Leave').length,
+    absent: employees.filter((e) => e.status === 'Absent').length,
   }
 
-  if (loading) {
+  if (loading)
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Loading employees...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading employees...</p>
         </div>
       </div>
     )
-  }
 
   return (
-    <div className="space-y-6">
-      {/* Page Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Employees</h1>
-          <p className="text-slate-600 mt-1">Manage employee records and information</p>
+    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50 p-6 rounded-3xl space-y-8">
+      {/* Header Section */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6">
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
+              <FaUsers className="text-white text-3xl" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-1">Employees</h1>
+              <p className="text-blue-100">Manage all employee records and profiles</p>
+            </div>
+          </div>
+          <button
+            onClick={handleAddEmployee}
+            className="flex items-center gap-2 px-5 py-3 bg-white text-blue-700 rounded-xl font-semibold shadow-md hover:bg-blue-50 transition-all"
+          >
+            <FaPlus /> Add Employee
+          </button>
         </div>
-        <button 
-          onClick={handleAddEmployee}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md flex items-center gap-2"
-        >
-          <span>➕</span>
-          <span>Add Employee</span>
-        </button>
-      </div>
+      </section>
 
       {/* Error Message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <p className="text-red-600">{error}</p>
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-600">
+          {error}
         </div>
       )}
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-md p-4 border border-slate-200">
-          <p className="text-sm text-slate-600">Total Employees</p>
-          <p className="text-3xl font-bold text-indigo-600 mt-1">{stats.total}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-4 border border-slate-200">
-          <p className="text-sm text-slate-600">Present Today</p>
-          <p className="text-3xl font-bold text-green-600 mt-1">{stats.present}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-4 border border-slate-200">
-          <p className="text-sm text-slate-600">On Leave</p>
-          <p className="text-3xl font-bold text-blue-600 mt-1">{stats.onLeave}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-4 border border-slate-200">
-          <p className="text-sm text-slate-600">Absent</p>
-          <p className="text-3xl font-bold text-yellow-600 mt-1">{stats.absent}</p>
-        </div>
-      </div>
+      {/* Stats Section */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: 'Total Employees', value: stats.total, color: 'blue' },
+          { label: 'Present Today', value: stats.present, color: 'green' },
+          { label: 'On Leave', value: stats.onLeave, color: 'indigo' },
+          { label: 'Absent', value: stats.absent, color: 'amber' },
+        ].map((s, i) => (
+          <div
+            key={i}
+            className={`bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-md p-5 hover:scale-[1.02] transition-transform duration-300`}
+          >
+            <p className="text-sm text-gray-500">{s.label}</p>
+            <p
+              className={`text-3xl font-bold text-${s.color}-600 mt-1`}
+            >
+              {s.value}
+            </p>
+          </div>
+        ))}
+      </section>
 
-      {/* Search and Filters */}
-      <div className="bg-white rounded-lg shadow-md p-4 border border-slate-200">
+      {/* Filters Section */}
+      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6">
         <div className="flex flex-col md:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="Search employees..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          />
-          <select 
+          <div className="relative flex-1">
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-blue-500" />
+            <input
+              type="text"
+              placeholder="Search employees by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 rounded-xl border border-blue-100 focus:ring-4 focus:ring-blue-200 outline-none shadow-sm"
+            />
+          </div>
+
+          <select
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-3 border border-blue-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-200 outline-none"
           >
             <option value="">All Departments</option>
             <option value="Engineering">Engineering</option>
@@ -215,10 +206,11 @@ export default function Employees() {
             <option value="Finance">Finance</option>
             <option value="Operations">Operations</option>
           </select>
-          <select 
+
+          <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-3 border border-blue-100 rounded-xl shadow-sm focus:ring-4 focus:ring-blue-200 outline-none"
           >
             <option value="">All Status</option>
             <option value="Present">Present</option>
@@ -226,23 +218,22 @@ export default function Employees() {
             <option value="Absent">Absent</option>
           </select>
         </div>
-      </div>
+      </section>
 
-      {/* Employee Cards Grid */}
+      {/* Employee Cards */}
       {filteredEmployees.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-12 text-center border border-slate-200">
+        <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-blue-100 shadow-md p-12 text-center">
           <div className="text-6xl mb-4">👥</div>
-          <h3 className="text-xl font-semibold text-slate-800 mb-2">No Employees Found</h3>
-          <p className="text-slate-600 mb-4">
-            {employees.length === 0 
-              ? "Get started by adding your first employee"
-              : "Try adjusting your search or filters"
-            }
+          <h3 className="text-xl font-semibold text-gray-800 mb-2">No Employees Found</h3>
+          <p className="text-gray-600 mb-4">
+            {employees.length === 0
+              ? 'Start by adding your first employee'
+              : 'Try adjusting your filters'}
           </p>
           {employees.length === 0 && (
             <button
               onClick={handleAddEmployee}
-              className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all"
             >
               Add First Employee
             </button>
@@ -260,28 +251,28 @@ export default function Employees() {
         </div>
       )}
 
-      {/* Employee Details Modal */}
+      {/* Employee View Modal */}
       <Modal
         isOpen={isViewModalOpen}
-        onClose={handleCloseViewModal}
+        onClose={() => setIsViewModalOpen(false)}
         title="Employee Details"
         footer={
           <>
             <button
-              onClick={handleCloseViewModal}
-              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+              onClick={() => setIsViewModalOpen(false)}
+              className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
             >
               Close
             </button>
-            <button 
+            <button
               onClick={() => handleEditEmployee(selectedEmployee)}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
             >
-              Edit Employee
+              Edit
             </button>
-            <button 
+            <button
               onClick={() => handleDeleteEmployee(selectedEmployee._id)}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
             >
               Delete
             </button>
@@ -291,36 +282,35 @@ export default function Employees() {
         {selectedEmployee && (
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
                 {selectedEmployee.name
                   .split(' ')
                   .map((n) => n[0])
                   .join('')}
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-slate-800">
+                <h3 className="text-xl font-semibold text-gray-800">
                   {selectedEmployee.name}
                 </h3>
-                <p className="text-sm text-slate-600">{selectedEmployee.designation}</p>
-                <p className="text-xs text-slate-500">{selectedEmployee.employeeId}</p>
+                <p className="text-sm text-gray-600">{selectedEmployee.designation}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-blue-100">
               <div>
-                <p className="text-sm text-slate-600">Email</p>
-                <p className="font-medium text-slate-800">{selectedEmployee.email}</p>
+                <p className="text-sm text-gray-500">Email</p>
+                <p className="font-medium text-gray-800">{selectedEmployee.email}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-600">Phone</p>
-                <p className="font-medium text-slate-800">{selectedEmployee.phone || 'N/A'}</p>
+                <p className="text-sm text-gray-500">Phone</p>
+                <p className="font-medium text-gray-800">{selectedEmployee.phone || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-600">Department</p>
-                <p className="font-medium text-slate-800">{selectedEmployee.department}</p>
+                <p className="text-sm text-gray-500">Department</p>
+                <p className="font-medium text-gray-800">{selectedEmployee.department}</p>
               </div>
               <div>
-                <p className="text-sm text-slate-600">Status</p>
+                <p className="text-sm text-gray-500">Status</p>
                 <span
                   className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${
                     selectedEmployee.status === 'Present'
@@ -333,33 +323,21 @@ export default function Employees() {
                   {selectedEmployee.status}
                 </span>
               </div>
-              {selectedEmployee.manager && (
-                <div>
-                  <p className="text-sm text-slate-600">Manager</p>
-                  <p className="font-medium text-slate-800">{selectedEmployee.manager}</p>
-                </div>
-              )}
-              {selectedEmployee.location && (
-                <div>
-                  <p className="text-sm text-slate-600">Location</p>
-                  <p className="font-medium text-slate-800">{selectedEmployee.location}</p>
-                </div>
-              )}
             </div>
           </div>
         )}
       </Modal>
 
-      {/* Add/Edit Employee Form Modal */}
+      {/* Employee Form Modal */}
       <Modal
         isOpen={isFormModalOpen}
-        onClose={handleCloseFormModal}
+        onClose={() => setIsFormModalOpen(false)}
         title={editingEmployee ? 'Edit Employee' : 'Add New Employee'}
       >
         <EmployeeForm
           employee={editingEmployee}
           onSubmit={handleSubmitEmployee}
-          onCancel={handleCloseFormModal}
+          onCancel={() => setIsFormModalOpen(false)}
         />
       </Modal>
     </div>
