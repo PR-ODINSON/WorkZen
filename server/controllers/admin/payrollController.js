@@ -6,6 +6,17 @@ const { success, error } = require('../../utils/response');
  * Business logic is in payrollService
  */
 
+// Dashboard endpoint
+exports.getDashboard = async (req, res) => {
+  try {
+    const dashboard = await payrollService.getPayrollDashboard();
+    return success(res, dashboard);
+  } catch (err) {
+    console.error('Get payroll dashboard error:', err);
+    return error(res, err.message);
+  }
+};
+
 exports.list = async (req, res) => {
   try {
     const result = await payrollService.getAllPayrolls(req.query);

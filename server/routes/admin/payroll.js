@@ -6,6 +6,10 @@ const { verifyToken, adminOnly } = require('../../middlewares/authMiddleware');
 // Apply auth middleware to all routes
 router.use(verifyToken, adminOnly);
 
+// Dashboard Route
+// GET /api/admin/payroll/dashboard - Get payroll dashboard data
+router.get('/dashboard', payrollCtrl.getDashboard);
+
 // Payroll Routes
 // GET /api/admin/payroll - Get all payroll records
 router.get('/', payrollCtrl.list);

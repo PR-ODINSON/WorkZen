@@ -6,6 +6,14 @@ import api from '../api';
 
 export const payrollService = {
   /**
+   * Get payroll dashboard
+   */
+  getDashboard: async () => {
+    const response = await api.get('/admin/payroll/dashboard');
+    return response.data;
+  },
+
+  /**
    * Get all payroll records
    */
   getAll: async (params = {}) => {
