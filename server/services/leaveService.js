@@ -181,9 +181,14 @@ class LeaveService {
       .filter(leave => leave.leaveType === 'Sick time off')
       .reduce((sum, leave) => sum + leave.numberOfDays, 0);
 
+    const unpaidDaysUsed = approvedLeaves
+      .filter(leave => leave.leaveType === 'Unpaid')
+      .reduce((sum, leave) => sum + leave.numberOfDays, 0);
+
     // Standard allocations (can be made configurable later)
     const paidTimeOffTotal = 24;
     const sickTimeOffTotal = 7;
+    // Unpaid has no limit, so we don't track total/available
 
     return {
       paidTimeOff: {
@@ -195,6 +200,9 @@ class LeaveService {
         total: sickTimeOffTotal,
         used: sickDaysUsed,
         available: sickTimeOffTotal - sickDaysUsed
+      },
+      unpaid: {
+        used: unpaidDaysUsed
       }
     };
   }

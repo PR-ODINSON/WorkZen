@@ -93,9 +93,14 @@ const Navbar = () => {
     setLoading(true)
     try {
       const response = await attendanceService.checkIn()
-      setAttendanceStatus(response.data?.attendance || null)
+      console.log('Check-in response:', response)
+      
+      const attendance = response.data?.attendance || response.attendance
+      console.log('Extracted attendance:', attendance)
+      
+      setAttendanceStatus(attendance)
       alert('✅ Checked in successfully!')
-      await fetchTodayStatus()
+      
       // Notify other components about attendance update
       window.dispatchEvent(new Event('attendanceUpdated'))
     } catch (error) {
@@ -110,9 +115,14 @@ const Navbar = () => {
     setLoading(true)
     try {
       const response = await attendanceService.checkOut()
-      setAttendanceStatus(response.data?.attendance || null)
+      console.log('Check-out response:', response)
+      
+      const attendance = response.data?.attendance || response.attendance
+      console.log('Extracted attendance:', attendance)
+      
+      setAttendanceStatus(attendance)
       alert('✅ Checked out successfully!')
-      await fetchTodayStatus()
+      
       // Notify other components about attendance update
       window.dispatchEvent(new Event('attendanceUpdated'))
     } catch (error) {

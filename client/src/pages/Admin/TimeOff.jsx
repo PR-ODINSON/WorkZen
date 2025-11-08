@@ -116,11 +116,11 @@ export default function TimeOff() {
       accessor: 'leaveType',
       render: (value) => (
         <span className={`px-3 py-1 rounded-lg text-sm font-medium ${
-          value === 'Paid Time Off' 
+          value === 'Paid time Off' 
             ? 'bg-blue-100 text-blue-700'
-            : value === 'Sick Leave'
+            : value === 'Sick time off'
             ? 'bg-orange-100 text-orange-700'
-            : value === 'Unpaid Time Off'
+            : value === 'Unpaid'
             ? 'bg-gray-100 text-gray-700'
             : 'bg-purple-100 text-purple-700'
         }`}>
@@ -208,9 +208,9 @@ export default function TimeOff() {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Time Off Types</option>
-            <option value="Paid Time Off">Paid Time Off</option>
-            <option value="Sick Leave">Sick Leave</option>
-            <option value="Unpaid Time Off">Unpaid Time Off</option>
+            <option value="Paid time Off">Paid time Off</option>
+            <option value="Sick time off">Sick time off</option>
+            <option value="Unpaid">Unpaid</option>
           </select>
           
           <select
