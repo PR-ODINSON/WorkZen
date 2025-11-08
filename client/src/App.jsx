@@ -2,6 +2,7 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion' // Assuming Framer Motion is installed for advanced animations
 import Login from './pages/Login'
+import Register from './pages/Register'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import RoleProtectedRoute from './components/layout/RoleProtectedRoute'
 import Navbar from './components/layout/Navbar'
@@ -71,25 +72,16 @@ const DashboardLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => (
 export default function App() {
   return (
     <Routes>
-      {/* Public Route */}
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       
-      {/* Root redirect to dashboard */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Root redirect based on role */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
       {/* Admin Routes */}
       <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Admin.Dashboard />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/employees"
+        path="/admin/employees"
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>

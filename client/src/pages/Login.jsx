@@ -134,7 +134,7 @@ export default function Login() {
               </label>
               <motion.input
                 whileFocus={{ scale: 1.01, borderColor: '#10B981' }}
-                type="email"
+                type="text"
                 required
                 className="w-full px-6 py-4 border-2 border-emerald-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all bg-white/50 backdrop-blur-sm"
                 placeholder="admin@workzen.com"

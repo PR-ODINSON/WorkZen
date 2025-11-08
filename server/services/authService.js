@@ -7,10 +7,45 @@ const generateToken = require('../utils/generateToken');
  */
 class AuthService {
   /**
-   * Register a new user
+   * Generate Login ID in format: OIJODO20220001
+   * OI = Odoo India (company code)
+   * JO = First 2 letters of first name
+   * DO = First 2 letters of last name
+   * 2022 = Joining year
+   * 0001 = Serial number
+   */
+  async generateLoginId(fullName, year) {
+    const nameParts = fullName.trim().split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts[nameParts.length - 1] || '';
+    
+    // Get first 2 letters of each name (uppercase)
+    const firstInitials = firstName.substring(0, 2).toUpperCase().padEnd(2, 'O');
+    const lastInitials = lastName.substring(0, 2).toUpperCase().padEnd(2, 'O');
+    
+    // Company code (fixed for Odoo India)
+    const companyCode = 'OI';
+    
+    // Count existing users for this year to get serial number
+    const yearStart = new Date(year, 0, 1);
+    const yearEnd = new Date(year, 11, 31, 23, 59, 59);
+    
+    const count = await User.countDocuments({
+      joiningYear: year,
+      loginId: { $exists: true }
+    });
+    
+    const serialNumber = String(count + 1).padStart(4, '0');
+    
+    // Format: OIJODO20220001
+    return `${companyCode}${firstInitials}${lastInitials}${year}${serialNumber}`;
+  }
+
+  /**
+   * Register a new user (Admin only)
    */
   async register(userData) {
-    const { email, password, name } = userData;
+    const { email, password, name, phone } = userData;
 
     // Check if user exists
     const existingUser = await User.findOne({ email });
@@ -18,9 +53,12 @@ class AuthService {
       throw new Error('User already exists');
     }
 
-    // Check if this is the first user (make them admin)
-    const userCount = await User.countDocuments();
-    const role = userCount === 0 ? 'admin' : 'employee';
+    // Registration is only for Admin users
+    const role = 'Admin';
+
+    // Generate Login ID
+    const joiningYear = new Date().getFullYear();
+    const loginId = await this.generateLoginId(name, joiningYear);
 
     // Hash password
     const salt = await bcrypt.genSalt(10);
@@ -30,8 +68,11 @@ class AuthService {
     const user = await User.create({
       name,
       email,
+      phone,
       password: hashedPassword,
       role,
+      loginId,
+      joiningYear,
     });
 
     return {
@@ -39,20 +80,29 @@ class AuthService {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
+        loginId: user.loginId,
       },
       token: generateToken(user._id),
     };
   }
 
   /**
-   * Login user
+   * Login user (accepts email or loginId)
    */
   async login(credentials) {
     const { email, password } = credentials;
 
-    // Find user
-    const user = await User.findOne({ email });
+    console.log('Login attempt with:', email);
+
+    // Find user by email or loginId
+    const user = await User.findOne({
+      $or: [{ email }, { loginId: email }]
+    });
+    
+    console.log('User found:', user ? `Yes - ${user.email} (LoginID: ${user.loginId})` : 'No');
+    
     if (!user) {
       throw new Error('Invalid credentials');
     }
@@ -68,7 +118,9 @@ class AuthService {
         id: user._id,
         name: user.name,
         email: user.email,
+        phone: user.phone,
         role: user.role,
+        loginId: user.loginId,
       },
       token: generateToken(user._id),
     };

@@ -29,7 +29,6 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
     const roleRoutes = {
       'admin': '/admin/employees',
       'hr': '/hr/employees',
-      'payroll': '/payroll/employees',
       'payrollofficer': '/payroll/employees',
       'employee': '/employee/attendance',
     }

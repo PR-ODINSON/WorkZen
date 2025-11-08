@@ -30,6 +30,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await authService.login(credentials)
       console.log('Login response:', response)
+      
+      // Backend returns { success: true, user, token }
+      if (!response.success || !response.user || !response.token) {
+        throw new Error('Invalid response format')
+      }
+      
       const { user, token } = response
       
       // Store token and user data
@@ -38,15 +44,29 @@ export const AuthProvider = ({ children }) => {
       setUser(user)
       
       console.log('User set:', user)
-      console.log('Redirecting to:', user.role)
+      console.log('User role:', user.role)
       
       // Redirect based on role
-      redirectBasedOnRole(user.role)
+      const normalizedRole = user.role.toLowerCase()
+      const roleRoutes = {
+        'admin': '/admin/employees',
+        'hr': '/hr/employees',
+        'payrollofficer': '/payroll/employees',
+        'employee': '/employee/attendance',
+      }
+      
+      const route = roleRoutes[normalizedRole] || '/employee/attendance'
+      console.log('Navigating to:', route)
+      
+      // Navigate after a short delay to ensure state is set
+      setTimeout(() => {
+        navigate(route, { replace: true })
+      }, 100)
       
       return { success: true }
     } catch (error) {
       console.error('Login error:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: error.response?.data?.message || error.message || 'Login failed' }
     }
   }
 
@@ -55,23 +75,6 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user')
     setUser(null)
     navigate('/login')
-  }
-
-  const redirectBasedOnRole = (role) => {
-    const roleRoutes = {
-      'admin': '/admin/employees',
-      'Admin': '/admin/employees',
-      'hr': '/hr/employees',
-      'HR': '/hr/employees',
-      'payroll': '/payroll/employees',
-      'payrollofficer': '/payroll/employees',
-      'Payroll Officer': '/payroll/employees',
-      'employee': '/employee/attendance',
-      'Employee': '/employee/attendance',
-    }
-    
-    const route = roleRoutes[role] || '/employee/attendance'
-    navigate(route)
   }
 
   const hasRole = (allowedRoles) => {

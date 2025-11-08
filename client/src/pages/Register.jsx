@@ -18,7 +18,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const companyName = 'Odoo India' // Fixed company name
+  const companyName = 'Odoo India'
 
   const handleChange = (e) => {
     setFormData({

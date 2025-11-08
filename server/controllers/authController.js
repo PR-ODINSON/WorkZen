@@ -6,16 +6,16 @@ const { success, error } = require('../utils/response');
  * Business logic is in authService
  */
 
-// Register User (First user becomes admin)
+// Register User (Admin only)
 exports.registerAdmin = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone } = req.body;
     
     if (!name || !email || !password) {
       return error(res, 'Missing required fields', 400);
     }
 
-    const result = await authService.register({ name, email, password });
+    const result = await authService.register({ name, email, password, phone });
     return success(res, result, 201);
   } catch (err) {
     console.error('Register error:', err);
