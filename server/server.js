@@ -34,6 +34,7 @@ app.use('/api/admin/timeoff', require('./routes/admin/timeoff'));
 // HR routes
 app.use('/api/hr/employees', require('./routes/hr/employees'));
 app.use('/api/hr/attendance', require('./routes/hr/attendance'));
+app.use('/api/hr/timeoff', require('./routes/hr/timeoff'));
 
 // Health check
 app.get('/', (req, res) => res.json({ success: true, message: 'WorkZen API running' }));

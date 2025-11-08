@@ -4,7 +4,7 @@
 export { default as Dashboard } from './Dashboard'
 export { default as HR_Employees } from '../HR/HR_Employees'
 export { default as HR_Attendance } from '../HR/HR_Attendance'
-export { default as TimeOff } from '../Admin/TimeOff'
+export { default as TimeOff } from '../HR/HR_TimeOff'
 export { default as Reports } from '../Admin/Reports'
 export { default as HR_MyProfile } from '../HR/HR_MyProfile'
 export { default as Sidebar } from './Sidebar'
