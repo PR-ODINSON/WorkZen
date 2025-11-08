@@ -241,7 +241,7 @@ export default function Attendance() {
   ]
 
   return (
-    <div className="min-h-screen space-y-6">
+    <div className="space-y-6">
       {/* Header Section */}
       <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl p-8">
         <div className="relative z-10 flex items-center gap-4">

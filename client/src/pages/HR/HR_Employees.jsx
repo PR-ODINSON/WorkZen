@@ -119,7 +119,7 @@ export default function HR_Employees() {
     )
 
   return (
-    <div className="min-h-screen rounded-3xl space-y-8">
+    <div className="rounded-3xl space-y-8">
       {/* 🌿 Header Section */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-green-600 to-emerald-500 text-white shadow-2xl p-6">
         {/* Animated Background Circles */}
