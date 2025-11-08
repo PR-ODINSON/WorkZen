@@ -100,6 +100,63 @@ export const attendanceService = {
     const response = await api.get('/admin/attendance/today');
     return response.data;
   },
+
+  // HR-specific methods
+  /**
+   * Get all attendance records (HR)
+   */
+  getAllHR: async (params = {}) => {
+    const response = await api.get('/hr/attendance', { params });
+    return response.data;
+  },
+
+  /**
+   * Get attendance by ID (HR)
+   */
+  getByIdHR: async (id) => {
+    const response = await api.get(`/hr/attendance/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Create attendance record (HR)
+   */
+  createHR: async (attendanceData) => {
+    const response = await api.post('/hr/attendance', attendanceData);
+    return response.data;
+  },
+
+  /**
+   * Update attendance record (HR)
+   */
+  updateHR: async (id, attendanceData) => {
+    const response = await api.put(`/hr/attendance/${id}`, attendanceData);
+    return response.data;
+  },
+
+  /**
+   * Delete attendance record (HR)
+   */
+  deleteHR: async (id) => {
+    const response = await api.delete(`/hr/attendance/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Mark attendance for logged-in user (HR)
+   */
+  markUserAttendanceHR: async () => {
+    const response = await api.post('/hr/attendance/mark');
+    return response.data;
+  },
+
+  /**
+   * Get today's attendance status for logged-in user (HR)
+   */
+  getTodayUserStatusHR: async () => {
+    const response = await api.get('/hr/attendance/today');
+    return response.data;
+  },
 };
 
 export default attendanceService;
