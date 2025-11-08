@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import Table from '../../components/ui/Table'
-import { FaCalendarCheck, FaUserClock, FaUserTimes, FaUserCheck } from 'react-icons/fa'
+import { 
+  FaCalendarCheck, 
+  FaUserClock, 
+  FaUserTimes, 
+  FaUserCheck 
+} from 'react-icons/fa'
 import attendanceService from '../../services/attendanceService'
 
 export default function HR_Attendance() {
   const [attendanceData, setAttendanceData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [markingAttendance, setMarkingAttendance] = useState(false)
-  const [userAttendanceStatus, setUserAttendanceStatus] = useState(null)
   const [stats, setStats] = useState({
     present: 0,
     absent: 0,
@@ -20,33 +23,14 @@ export default function HR_Attendance() {
 
   useEffect(() => {
     fetchAttendanceData()
-    fetchUserAttendanceStatus()
+
+    const handleAttendanceUpdate = () => fetchAttendanceData()
+    window.addEventListener('attendanceUpdated', handleAttendanceUpdate)
+    
+    return () => {
+      window.removeEventListener('attendanceUpdated', handleAttendanceUpdate)
+    }
   }, [filters])
-
-  const fetchUserAttendanceStatus = async () => {
-    try {
-      const response = await attendanceService.getTodayUserStatusHR()
-      setUserAttendanceStatus(response.data?.attendance || null)
-    } catch (error) {
-      console.error('Error fetching user attendance status:', error)
-      setUserAttendanceStatus(null)
-    }
-  }
-
-  const handleMarkAttendance = async () => {
-    setMarkingAttendance(true)
-    try {
-      const response = await attendanceService.markUserAttendanceHR()
-      setUserAttendanceStatus(response.data?.attendance || null)
-      alert('✅ Attendance marked successfully!')
-      fetchAttendanceData() // Refresh the table
-    } catch (error) {
-      console.error('Error marking attendance:', error)
-      alert(error.response?.data?.message || 'Failed to mark attendance. Please try again.')
-    } finally {
-      setMarkingAttendance(false)
-    }
-  }
 
   const fetchAttendanceData = async () => {
     setLoading(true)
@@ -57,8 +41,10 @@ export default function HR_Attendance() {
         limit: 100
       })
       
-      if (response.success && response.data?.attendance) {
-        const formattedData = response.data.attendance.map((record) => {
+      const attendanceArray = response?.attendance || []
+
+      if (Array.isArray(attendanceArray) && attendanceArray.length > 0) {
+        const formattedData = attendanceArray.map((record) => {
           const workHours = calculateWorkHours(record.checkIn, record.checkOut)
           const extraHours = calculateExtraHours(record.checkIn, record.checkOut, workHours)
           
@@ -82,15 +68,19 @@ export default function HR_Attendance() {
         
         setAttendanceData(formattedData)
         
-        // Calculate stats
         const present = formattedData.filter(r => r.status === 'present' && r.checkIn !== '-').length
         const absent = formattedData.filter(r => r.status === 'absent' || r.checkIn === '-').length
         const late = formattedData.filter(r => r.checkIn !== '-' && isLate(r.checkIn)).length
         
         setStats({ present, absent, late })
+      } else {
+        setAttendanceData([])
+        setStats({ present: 0, absent: 0, late: 0 })
       }
     } catch (error) {
       console.error('Error fetching attendance:', error)
+      setAttendanceData([])
+      setStats({ present: 0, absent: 0, late: 0 })
     } finally {
       setLoading(false)
     }
@@ -106,50 +96,27 @@ export default function HR_Attendance() {
 
   const calculateExtraHours = (checkIn, checkOut, workHours) => {
     if (!checkIn || !checkOut) return '00:00'
-    
-    // Parse work hours
     const [hours, minutes] = workHours.split(':').map(Number)
     const totalWorkMinutes = hours * 60 + minutes
     const totalWorkHours = totalWorkMinutes / 60
-    
-    // If work hours <= 8, no extra hours
     if (totalWorkHours <= 8) return '00:00'
     
-    // Calculate extra hours as (checkout time - 5:00 PM)
     const checkOutDate = new Date(checkOut)
     const endOfDay = new Date(checkOut)
-    endOfDay.setHours(17, 0, 0, 0) // 5:00 PM
-    
+    endOfDay.setHours(17, 0, 0, 0)
     if (checkOutDate <= endOfDay) return '00:00'
     
     const extraMs = checkOutDate - endOfDay
     const extraHours = Math.floor(extraMs / 1000 / 60 / 60)
     const extraMinutes = Math.floor((extraMs / 1000 / 60) % 60)
-    
     return `${String(extraHours).padStart(2, '0')}:${String(extraMinutes).padStart(2, '0')}`
   }
 
   const isLate = (checkInTime) => {
-    // Assuming work starts at 9:00 AM
     const checkIn = new Date(`2000-01-01 ${checkInTime}`)
     const startTime = new Date('2000-01-01 09:00 AM')
     return checkIn > startTime
   }
-
-  const getCurrentDateInfo = () => {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-    
-    const now = new Date()
-    const dayName = days[now.getDay()]
-    const date = now.getDate()
-    const month = months[now.getMonth()]
-    const year = now.getFullYear()
-    
-    return { dayName, date, month, year }
-  }
-
-  const dateInfo = getCurrentDateInfo()
 
   const columns = [
     { header: 'Employee', accessor: 'employee' },
@@ -180,69 +147,77 @@ export default function HR_Attendance() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50 p-6 rounded-3xl space-y-8">
+    <div className="min-h-screen rounded-3xl space-y-8">
       {/* Header Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6">
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-green-600 to-emerald-500 text-white shadow-xl p-6">
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
               <FaCalendarCheck className="text-white text-3xl" />
             </div>
             <div>
-              <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold mb-1">Attendance</h1>
-                <div className="text-sm bg-white/20 px-3 py-1 rounded-lg backdrop-blur-sm">
-                  <span className="font-semibold">{dateInfo.date} {dateInfo.month} {dateInfo.year}</span>
-                  <span className="mx-2">•</span>
-                  <span>{dateInfo.dayName}</span>
-                </div>
-              </div>
-              <p className="text-blue-100">Track and manage employee attendance records</p>
+              <h1 className="text-3xl font-bold mb-1">Attendance Overview</h1>
+              <p className="text-green-100">Monitor employee attendance in real time</p>
             </div>
           </div>
-          <button 
-            onClick={handleMarkAttendance}
-            disabled={markingAttendance || (userAttendanceStatus && userAttendanceStatus.checkIn)}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold shadow-md transition-all ${
-              userAttendanceStatus && userAttendanceStatus.checkIn
-                ? 'bg-green-500 text-white cursor-not-allowed'
-                : 'bg-white text-blue-700 hover:bg-blue-50'
-            } ${markingAttendance ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <FaUserCheck /> 
-            {userAttendanceStatus && userAttendanceStatus.checkIn 
-              ? 'Attendance Marked' 
-              : markingAttendance 
-              ? 'Marking...' 
-              : 'Mark Attendance'}
-          </button>
         </div>
       </section>
 
       {/* Date Filter */}
-      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-4">
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Filter by Date:</label>
-          <input
-            type="date"
-            value={filters.startDate}
-            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <span className="text-gray-500">to</span>
-          <input
-            type="date"
-            value={filters.endDate}
-            onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+      <section className="bg-white/90 backdrop-blur-sm border border-green-100 rounded-2xl shadow-md p-4 flex flex-wrap gap-4 items-center">
+        <label className="text-sm font-medium text-gray-700">Filter by Date:</label>
+        <input
+          type="date"
+          value={filters.startDate}
+          onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        />
+        <span className="text-gray-500">to</span>
+        <input
+          type="date"
+          value={filters.endDate}
+          onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
+          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+        />
+        <button
+          onClick={fetchAttendanceData}
+          className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+        >
+          Apply
+        </button>
       </section>
 
+      {/* Stats Section
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-green-50 border border-green-100 rounded-2xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
+          <FaUserCheck className="text-green-600 text-3xl" />
+          <div>
+            <p className="text-sm text-gray-600">Present Today</p>
+            <h2 className="text-2xl font-bold text-green-700">{stats.present}</h2>
+          </div>
+        </div>
+
+        <div className="bg-red-50 border border-red-100 rounded-2xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
+          <FaUserTimes className="text-red-600 text-3xl" />
+          <div>
+            <p className="text-sm text-gray-600">Absent Today</p>
+            <h2 className="text-2xl font-bold text-red-700">{stats.absent}</h2>
+          </div>
+        </div>
+
+        <div className="bg-yellow-50 border border-yellow-100 rounded-2xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
+          <FaUserClock className="text-yellow-600 text-3xl" />
+          <div>
+            <p className="text-sm text-gray-600">Late Arrivals</p>
+            <h2 className="text-2xl font-bold text-yellow-700">{stats.late}</h2>
+          </div>
+        </div>
+      </div> */}
+
       {/* Table Section */}
-      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6">
+      <section className="bg-white/90 backdrop-blur-sm border border-green-100 rounded-2xl shadow-lg p-6">
         <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <FaUserClock className="text-blue-500" /> Daily Attendance Overview
+          <FaUserClock className="text-green-500" /> Daily Attendance Records
         </h2>
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading attendance data...</div>
