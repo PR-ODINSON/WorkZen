@@ -27,7 +27,7 @@ class EmployeeService {
 
     const skip = (page - 1) * limit;
     const employees = await Employee.find(filter)
-      .populate('userId', 'name email role loginId')
+      .populate('userId', 'name email loginId role')
       .limit(parseInt(limit))
       .skip(skip)
       .sort({ createdAt: -1 });
