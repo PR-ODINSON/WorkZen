@@ -5,7 +5,6 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const links = [
-    { label: 'Dashboard', to: '/dashboard', icon: '📊' },
     { label: 'Employees', to: '/employees', icon: '👥' },
     { label: 'Attendance', to: '/attendance', icon: '📅' },
     { label: 'Time Off', to: '/timeoff', icon: '🏖️' },
@@ -24,11 +23,25 @@ const Sidebar = () => {
       <div className="p-6 border-b border-slate-700">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
-            <h1 className="text-xl font-bold text-indigo-400">WorkZen</h1>
+            <div className="flex items-center gap-3">
+              {/* Company Logo Placeholder */}
+              <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">W</span>
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-white">Company Name</h1>
+                <p className="text-xs text-slate-400">HRMS</p>
+              </div>
+            </div>
+          )}
+          {isCollapsed && (
+            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center mx-auto">
+              <span className="text-white font-bold text-lg">W</span>
+            </div>
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-slate-400 hover:text-white transition-colors"
+            className="text-slate-400 hover:text-white transition-colors ml-auto"
             title={isCollapsed ? 'Expand' : 'Collapse'}
           >
             {isCollapsed ? '→' : '←'}

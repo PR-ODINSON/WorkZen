@@ -38,20 +38,10 @@ export default function App() {
       {/* Public Route */}
       <Route path="/login" element={<Login />} />
       
-      {/* Root redirect */}
-      <Route path="/" element={<Navigate to="/dashboard" replace />} />
+      {/* Root redirect to employees */}
+      <Route path="/" element={<Navigate to="/employees" replace />} />
 
       {/* Protected Routes with Dashboard Layout */}
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <DashboardLayout>
-              <Dashboard />
-            </DashboardLayout>
-          </ProtectedRoute>
-        }
-      />
       <Route
         path="/employees"
         element={

@@ -25,8 +25,8 @@ export default function Login() {
           localStorage.setItem('userEmail', res.data.user.email)
         }
         
-        // Redirect to dashboard
-        navigate('/dashboard')
+        // Redirect to employees
+        navigate('/employees')
       }
     } catch (err) {
       console.error('Login error:', err)
