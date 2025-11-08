@@ -52,6 +52,38 @@ export const leaveService = {
     const response = await api.delete(`/admin/timeoff/${id}`);
     return response.data;
   },
+
+  /**
+   * Get my leave requests (Employee)
+   */
+  getMyRequests: async (params = {}) => {
+    const response = await api.get('/leaves/my-requests', { params });
+    return response.data;
+  },
+
+  /**
+   * Get leave balance (Employee)
+   */
+  getBalance: async () => {
+    const response = await api.get('/leaves/balance');
+    return response.data;
+  },
+
+  /**
+   * Create leave request (Employee)
+   */
+  createMyRequest: async (leaveData) => {
+    const response = await api.post('/leaves', leaveData);
+    return response.data;
+  },
+
+  /**
+   * Cancel leave request (Employee)
+   */
+  cancelMyRequest: async (id) => {
+    const response = await api.delete(`/leaves/${id}`);
+    return response.data;
+  },
 };
 
 export default leaveService;

@@ -22,6 +22,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 
 // Employee routes (for logged-in employees)
 app.use('/api/attendance', require('./routes/attendance'));
+app.use('/api/leaves', require('./routes/leaves'));
 
 // Admin routes
 app.use('/api/admin/employees', require('./routes/admin/employees'));
