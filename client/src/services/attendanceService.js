@@ -54,6 +54,14 @@ export const attendanceService = {
   },
 
   /**
+   * Get my attendance records (Employee)
+   */
+  getMyRecords: async (params = {}) => {
+    const response = await api.get('/attendance/my-records', { params });
+    return response.data;
+  },
+
+  /**
    * Employee check-in
    */
   checkIn: async () => {

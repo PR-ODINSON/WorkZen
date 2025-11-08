@@ -9,16 +9,17 @@ const Navbar = () => {
   const [loading, setLoading] = useState(false)
   const dropdownRef = useRef(null)
 
-  // Get user info from localStorage (if stored during login)
-  const userEmail = localStorage.getItem('userEmail') || 'Admin'
-  const userName = localStorage.getItem('userName') || 'Admin User'
-  
-  // Get user role from stored user object
+  // Get user info from stored user object
+  let userName = 'User'
+  let userEmail = 'user@example.com'
   let userRole = 'Employee'
+  
   try {
     const userStr = localStorage.getItem('user')
     if (userStr) {
       const user = JSON.parse(userStr)
+      userName = user.name || 'User'
+      userEmail = user.email || 'user@example.com'
       userRole = user.role || 'Employee'
     }
   } catch (error) {
@@ -61,6 +62,8 @@ const Navbar = () => {
       setAttendanceStatus(response.data?.attendance || null)
       alert('✅ Checked in successfully!')
       await fetchTodayStatus()
+      // Notify other components about attendance update
+      window.dispatchEvent(new Event('attendanceUpdated'))
     } catch (error) {
       console.error('Check-in error:', error)
       alert(error.response?.data?.message || 'Failed to check in. Please try again.')
@@ -76,6 +79,8 @@ const Navbar = () => {
       setAttendanceStatus(response.data?.attendance || null)
       alert('✅ Checked out successfully!')
       await fetchTodayStatus()
+      // Notify other components about attendance update
+      window.dispatchEvent(new Event('attendanceUpdated'))
     } catch (error) {
       console.error('Check-out error:', error)
       alert(error.response?.data?.message || 'Failed to check out. Please try again.')
@@ -86,9 +91,11 @@ const Navbar = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    // Remove legacy keys if they exist
     localStorage.removeItem('userName')
     localStorage.removeItem('userEmail')
-    localStorage.removeItem('user')
+    localStorage.removeItem('userRole')
     navigate('/login')
   }
 
@@ -117,52 +124,65 @@ const Navbar = () => {
         {/* Check-in/Check-out Buttons (Only for Employees) */}
         {userRole === 'Employee' && (
           <div className="flex items-center gap-3 border-r border-slate-200 pr-4">
-            {/* Check-in Button */}
-            <button
-              onClick={handleCheckIn}
-              disabled={loading || (attendanceStatus && attendanceStatus.checkIn)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                attendanceStatus && attendanceStatus.checkIn
-                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                  : 'bg-green-600 text-white hover:bg-green-700 active:scale-95'
-              } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span>
-                {attendanceStatus && attendanceStatus.checkIn
-                  ? `In: ${formatTime(attendanceStatus.checkIn)}`
-                  : 'Check In'}
-              </span>
-            </button>
+            {/* Check-in Button - Only show if not checked in */}
+            {!attendanceStatus?.checkIn && (
+              <button
+                onClick={handleCheckIn}
+                disabled={loading}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all bg-green-600 text-white hover:bg-green-700 active:scale-95 ${
+                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Check In</span>
+              </button>
+            )}
 
-            {/* Check-out Button */}
-            <button
-              onClick={handleCheckOut}
-              disabled={
-                loading ||
-                !attendanceStatus ||
-                !attendanceStatus.checkIn ||
-                attendanceStatus.checkOut
-              }
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                attendanceStatus && attendanceStatus.checkOut
-                  ? 'bg-red-100 text-red-700 cursor-not-allowed'
-                  : !attendanceStatus || !attendanceStatus.checkIn
-                  ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
-                  : 'bg-red-600 text-white hover:bg-red-700 active:scale-95'
-              } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              <span>
-                {attendanceStatus && attendanceStatus.checkOut
-                  ? `Out: ${formatTime(attendanceStatus.checkOut)}`
-                  : 'Check Out'}
-              </span>
-            </button>
+            {/* Check-in Status - Show if checked in but not checked out */}
+            {attendanceStatus?.checkIn && !attendanceStatus?.checkOut && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 font-medium">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>In: {formatTime(attendanceStatus.checkIn)}</span>
+              </div>
+            )}
+
+            {/* Check-out Button - Only show if checked in and not checked out */}
+            {attendanceStatus?.checkIn && !attendanceStatus?.checkOut && (
+              <button
+                onClick={handleCheckOut}
+                disabled={loading}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all bg-red-600 text-white hover:bg-red-700 active:scale-95 ${
+                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span>Check Out</span>
+              </button>
+            )}
+
+            {/* Both Check-in and Check-out completed */}
+            {attendanceStatus?.checkIn && attendanceStatus?.checkOut && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 font-medium">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>In: {formatTime(attendanceStatus.checkIn)}</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 font-medium">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Out: {formatTime(attendanceStatus.checkOut)}</span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

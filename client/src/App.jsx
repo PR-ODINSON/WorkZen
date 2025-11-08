@@ -190,9 +190,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Employee']}>
-              <DashboardLayout Sidebar={Employee.Sidebar}>
+              <SidebarLayout Sidebar={Employee.Sidebar}>
                 <Employee.Attendance />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -202,9 +202,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Employee']}>
-              <DashboardLayout Sidebar={Employee.Sidebar}>
+              <SidebarLayout Sidebar={Employee.Sidebar}>
                 <Employee.TimeOff />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -214,9 +214,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Employee']}>
-              <DashboardLayout Sidebar={Employee.Sidebar}>
+              <SidebarLayout Sidebar={Employee.Sidebar}>
                 <Employee.Payroll />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -226,9 +226,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Employee']}>
-              <DashboardLayout Sidebar={Employee.Sidebar}>
+              <SidebarLayout Sidebar={Employee.Sidebar}>
                 <Employee.Reports />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -238,9 +238,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Employee']}>
-              <DashboardLayout Sidebar={Employee.Sidebar}>
+              <SidebarLayout Sidebar={Employee.Sidebar}>
                 <Employee.MyProfile />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -252,9 +252,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['HR']}>
-              <DashboardLayout Sidebar={HR.Sidebar}>
+              <SidebarLayout Sidebar={HR.Sidebar}>
                 <HR.Employees />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -264,9 +264,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['HR']}>
-              <DashboardLayout Sidebar={HR.Sidebar}>
+              <SidebarLayout Sidebar={HR.Sidebar}>
                 <HR.Attendance />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -276,9 +276,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['HR']}>
-              <DashboardLayout Sidebar={HR.Sidebar}>
+              <SidebarLayout Sidebar={HR.Sidebar}>
                 <HR.TimeOff />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -288,9 +288,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['HR']}>
-              <DashboardLayout Sidebar={HR.Sidebar}>
+              <SidebarLayout Sidebar={HR.Sidebar}>
                 <HR.Reports />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -300,9 +300,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['HR']}>
-              <DashboardLayout Sidebar={HR.Sidebar}>
+              <SidebarLayout Sidebar={HR.Sidebar}>
                 <HR.MyProfile />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -314,9 +314,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['PayrollOfficer']}>
-              <DashboardLayout Sidebar={PayrollOfficer.Sidebar}>
+              <SidebarLayout Sidebar={PayrollOfficer.Sidebar}>
                 <PayrollOfficer.Employees />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -326,9 +326,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['PayrollOfficer']}>
-              <DashboardLayout Sidebar={PayrollOfficer.Sidebar}>
+              <SidebarLayout Sidebar={PayrollOfficer.Sidebar}>
                 <PayrollOfficer.Attendance />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -338,9 +338,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['PayrollOfficer']}>
-              <DashboardLayout Sidebar={PayrollOfficer.Sidebar}>
+              <SidebarLayout Sidebar={PayrollOfficer.Sidebar}>
                 <PayrollOfficer.TimeOff />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -350,9 +350,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['PayrollOfficer']}>
-              <DashboardLayout Sidebar={PayrollOfficer.Sidebar}>
+              <SidebarLayout Sidebar={PayrollOfficer.Sidebar}>
                 <PayrollOfficer.Payroll />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -362,9 +362,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['PayrollOfficer']}>
-              <DashboardLayout Sidebar={PayrollOfficer.Sidebar}>
+              <SidebarLayout Sidebar={PayrollOfficer.Sidebar}>
                 <PayrollOfficer.Reports />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -374,9 +374,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['PayrollOfficer']}>
-              <DashboardLayout Sidebar={PayrollOfficer.Sidebar}>
+              <SidebarLayout Sidebar={PayrollOfficer.Sidebar}>
                 <PayrollOfficer.MyProfile />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
