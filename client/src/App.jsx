@@ -167,7 +167,6 @@ export default function App() {
         { path: '/hr/employees', page: <HR.HR_Employees /> },
         { path: '/hr/attendance', page: <HR.HR_Attendance /> },
         { path: '/hr/timeoff', page: <HR.TimeOff /> },
-        { path: '/hr/reports', page: <HR.Reports /> },
         { path: '/hr/profile', page: <HR.HR_MyProfile /> },
       ].map(({ path, page }) => (
         <Route
