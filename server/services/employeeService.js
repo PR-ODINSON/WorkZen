@@ -16,9 +16,9 @@ class EmployeeService {
     const filter = {};
     if (search) {
       filter.$or = [
-        { firstName: { $regex: search, $options: 'i' } },
-        { lastName: { $regex: search, $options: 'i' } },
+        { name: { $regex: search, $options: 'i' } },
         { email: { $regex: search, $options: 'i' } },
+        { employeeId: { $regex: search, $options: 'i' } },
       ];
     }
     if (department) filter.department = department;
@@ -26,8 +26,7 @@ class EmployeeService {
 
     const skip = (page - 1) * limit;
     const employees = await Employee.find(filter)
-      .populate('department', 'name')
-      .populate('designation', 'title')
+      .populate('userId', 'name email loginId role')
       .limit(parseInt(limit))
       .skip(skip)
       .sort({ createdAt: -1 });
