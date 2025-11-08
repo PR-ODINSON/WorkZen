@@ -1,5 +1,12 @@
 import React from 'react'
 import Table from '../../components/ui/Table'
+import {
+  FaUmbrellaBeach,
+  FaHourglassHalf,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaPlus,
+} from 'react-icons/fa'
 
 export default function TimeOff() {
   const leaveData = [
@@ -34,33 +41,65 @@ export default function TimeOff() {
   ]
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Time Off</h1>
-          <p className="text-slate-600 mt-1">Manage leave requests and approvals</p>
+    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50 p-6 rounded-3xl space-y-8">
+      {/* Header Section */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6">
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
+              <FaUmbrellaBeach className="text-white text-3xl" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold mb-1">Time Off</h1>
+              <p className="text-blue-100">Manage and review employee leave requests</p>
+            </div>
+          </div>
+          <button className="flex items-center gap-2 px-5 py-3 bg-white text-blue-700 rounded-xl font-semibold shadow-md hover:bg-blue-50 transition-all">
+            <FaPlus /> Request Leave
+          </button>
         </div>
-        <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md">
-          Request Leave
-        </button>
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-lg shadow-md p-6 border border-slate-200">
-          <p className="text-sm text-slate-600">Pending Requests</p>
-          <p className="text-3xl font-bold text-yellow-600 mt-2">1</p>
+      {/* Statistics Section */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-yellow-100 flex items-center justify-center">
+            <FaHourglassHalf className="text-yellow-600 text-xl" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Pending Requests</p>
+            <p className="text-3xl font-bold text-yellow-600 mt-1">1</p>
+          </div>
         </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border border-slate-200">
-          <p className="text-sm text-slate-600">Approved</p>
-          <p className="text-3xl font-bold text-green-600 mt-2">1</p>
-        </div>
-        <div className="bg-white rounded-lg shadow-md p-6 border border-slate-200">
-          <p className="text-sm text-slate-600">Rejected</p>
-          <p className="text-3xl font-bold text-red-600 mt-2">1</p>
-        </div>
-      </div>
 
-      <Table columns={columns} data={leaveData} />
+        <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+            <FaCheckCircle className="text-green-600 text-xl" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Approved</p>
+            <p className="text-3xl font-bold text-green-600 mt-1">1</p>
+          </div>
+        </div>
+
+        <div className="bg-white/80 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6 flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center">
+            <FaTimesCircle className="text-red-600 text-xl" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500">Rejected</p>
+            <p className="text-3xl font-bold text-red-600 mt-1">1</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Table Section */}
+      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <FaUmbrellaBeach className="text-blue-500" /> Leave Requests Overview
+        </h2>
+        <Table columns={columns} data={leaveData} />
+      </section>
     </div>
   )
 }
