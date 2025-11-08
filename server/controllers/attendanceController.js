@@ -67,3 +67,22 @@ exports.checkOut = async (req, res) => {
     return error(res, err.message, 400);
   }
 };
+
+/**
+ * Get my attendance records (employee's own records)
+ */
+exports.getMyAttendance = async (req, res) => {
+  try {
+    const empId = req.user.empId; // Get employee ID from verified token
+    
+    if (!empId) {
+      return error(res, 'Employee profile not found', 404);
+    }
+
+    const result = await attendanceService.getEmployeeAttendance(empId, req.query);
+    return success(res, result);
+  } catch (err) {
+    console.error('Get my attendance error:', err);
+    return error(res, err.message);
+  }
+};

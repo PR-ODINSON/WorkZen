@@ -9,6 +9,9 @@ router.use(verifyToken);
 // GET /api/attendance/today - Get today's attendance status
 router.get('/today', attendanceCtrl.getTodayStatus);
 
+// GET /api/attendance/my-records - Get my attendance records
+router.get('/my-records', attendanceCtrl.getMyAttendance);
+
 // POST /api/attendance/checkin - Employee check-in
 router.post('/checkin', attendanceCtrl.checkIn);
 
