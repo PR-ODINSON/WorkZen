@@ -13,30 +13,118 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 import Sidebar from './components/layout/Sidebar'
 import Navbar from './components/layout/Navbar'
 
-const Layout = ({ children }) => (
-  <div className="min-h-screen flex">
+// Layout component for authenticated pages
+const DashboardLayout = ({ children }) => (
+  <div className="min-h-screen flex bg-slate-50">
+    {/* Sidebar - Fixed left */}
     <Sidebar />
-    <div className="flex-1 p-4">
+    
+    {/* Main content area */}
+    <div className="flex-1 ml-60">
+      {/* Navbar - Fixed top */}
       <Navbar />
-      {children}
+      
+      {/* Page content with top margin for navbar */}
+      <main className="mt-16 p-6">
+        {children}
+      </main>
     </div>
   </div>
 )
 
-export default function App(){
+export default function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login/>} />
-      <Route path="/" element={<Navigate to="/dashboard" />} />
+      {/* Public Route */}
+      <Route path="/login" element={<Login />} />
+      
+      {/* Root redirect */}
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-      <Route path="/dashboard" element={<ProtectedRoute><Layout><Dashboard/></Layout></ProtectedRoute>} />
-      <Route path="/employees" element={<ProtectedRoute><Layout><Employees/></Layout></ProtectedRoute>} />
-      <Route path="/attendance" element={<ProtectedRoute><Layout><Attendance/></Layout></ProtectedRoute>} />
-      <Route path="/timeoff" element={<ProtectedRoute><Layout><TimeOff/></Layout></ProtectedRoute>} />
-      <Route path="/payroll" element={<ProtectedRoute><Layout><Payroll/></Layout></ProtectedRoute>} />
-      <Route path="/reports" element={<ProtectedRoute><Layout><Reports/></Layout></ProtectedRoute>} />
-      <Route path="/settings" element={<ProtectedRoute><Layout><Settings/></Layout></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Layout><MyProfile/></Layout></ProtectedRoute>} />
+      {/* Protected Routes with Dashboard Layout */}
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Dashboard />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/employees"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Employees />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attendance"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Attendance />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/timeoff"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <TimeOff />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payroll"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Payroll />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/reports"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Reports />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <Settings />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <DashboardLayout>
+              <MyProfile />
+            </DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Catch all - redirect to dashboard */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )
 }
