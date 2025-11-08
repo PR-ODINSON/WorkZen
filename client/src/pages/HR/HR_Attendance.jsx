@@ -179,40 +179,7 @@ export default function HR_Attendance() {
           onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
         />
-        <button
-          onClick={fetchAttendanceData}
-          className="px-5 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-        >
-          Apply
-        </button>
       </section>
-
-      {/* Stats Section
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-green-50 border border-green-100 rounded-2xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
-          <FaUserCheck className="text-green-600 text-3xl" />
-          <div>
-            <p className="text-sm text-gray-600">Present Today</p>
-            <h2 className="text-2xl font-bold text-green-700">{stats.present}</h2>
-          </div>
-        </div>
-
-        <div className="bg-red-50 border border-red-100 rounded-2xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
-          <FaUserTimes className="text-red-600 text-3xl" />
-          <div>
-            <p className="text-sm text-gray-600">Absent Today</p>
-            <h2 className="text-2xl font-bold text-red-700">{stats.absent}</h2>
-          </div>
-        </div>
-
-        <div className="bg-yellow-50 border border-yellow-100 rounded-2xl shadow-sm p-6 flex items-center gap-4 hover:shadow-md transition">
-          <FaUserClock className="text-yellow-600 text-3xl" />
-          <div>
-            <p className="text-sm text-gray-600">Late Arrivals</p>
-            <h2 className="text-2xl font-bold text-yellow-700">{stats.late}</h2>
-          </div>
-        </div>
-      </div> */}
 
       {/* Table Section */}
       <section className="bg-white/90 backdrop-blur-sm border border-green-100 rounded-2xl shadow-lg p-6">

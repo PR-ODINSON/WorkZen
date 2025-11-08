@@ -5,8 +5,8 @@ import {
   FaUsers,
   FaCalendarCheck,
   FaUmbrellaBeach,
-  FaChartBar,
-  FaUserCircle,
+  // FaChartBar,
+  // FaUserCircle,
   FaWarehouse,
 } from 'react-icons/fa';
 import { useSidebar } from '../../context/SidebarContext';
@@ -18,8 +18,6 @@ const HRSidebar = () => {
     { label: 'Employees', to: '/hr/employees', icon: <FaUsers /> },
     { label: 'Attendance', to: '/hr/attendance', icon: <FaCalendarCheck /> },
     { label: 'Time Off', to: '/hr/timeoff', icon: <FaUmbrellaBeach /> },
-    { label: 'Reports', to: '/hr/reports', icon: <FaChartBar /> },
-    { label: 'My Profile', to: '/hr/profile', icon: <FaUserCircle /> },
   ];
 
   const sidebarVariants = {
