@@ -10,6 +10,9 @@ router.use(verifyToken);
 // POST /api/admin/attendance/mark - Mark attendance for logged-in user
 router.post('/mark', attendanceCtrl.markUserAttendance);
 
+// POST /api/admin/attendance/checkout - Check out for logged-in user
+router.post('/checkout', attendanceCtrl.checkOutUser);
+
 // GET /api/admin/attendance/today - Get today's attendance status for logged-in user
 router.get('/today', attendanceCtrl.getTodayUserStatus);
 

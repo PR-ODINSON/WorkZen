@@ -6,8 +6,6 @@ import attendanceService from '../../services/attendanceService'
 export default function Attendance() {
   const [attendanceData, setAttendanceData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [markingAttendance, setMarkingAttendance] = useState(false)
-  const [userAttendanceStatus, setUserAttendanceStatus] = useState(null)
   const [stats, setStats] = useState({
     present: 0,
     absent: 0,
@@ -20,44 +18,42 @@ export default function Attendance() {
 
   useEffect(() => {
     fetchAttendanceData()
-    fetchUserAttendanceStatus()
+    
+    // Listen for attendance updates
+    const handleAttendanceUpdate = () => {
+      console.log('Attendance updated event received, refreshing data...')
+      fetchAttendanceData()
+    }
+
+    window.addEventListener('attendanceUpdated', handleAttendanceUpdate)
+    
+    return () => {
+      window.removeEventListener('attendanceUpdated', handleAttendanceUpdate)
+    }
   }, [filters])
-
-  const fetchUserAttendanceStatus = async () => {
-    try {
-      const response = await attendanceService.getTodayUserStatus()
-      setUserAttendanceStatus(response.data?.attendance || null)
-    } catch (error) {
-      console.error('Error fetching user attendance status:', error)
-      setUserAttendanceStatus(null)
-    }
-  }
-
-  const handleMarkAttendance = async () => {
-    setMarkingAttendance(true)
-    try {
-      const response = await attendanceService.markUserAttendance()
-      setUserAttendanceStatus(response.data?.attendance || null)
-      alert('✅ Attendance marked successfully!')
-      fetchAttendanceData() // Refresh the table
-    } catch (error) {
-      console.error('Error marking attendance:', error)
-      alert(error.response?.data?.message || 'Failed to mark attendance. Please try again.')
-    } finally {
-      setMarkingAttendance(false)
-    }
-  }
 
   const fetchAttendanceData = async () => {
     setLoading(true)
     try {
+      console.log('Fetching attendance data with filters:', filters)
+      
       const response = await attendanceService.getAll({
         startDate: filters.startDate,
         endDate: filters.endDate,
         limit: 100
       })
       
-      if (response.success && response.data?.attendance) {
+      console.log('Attendance API response:', response)
+      console.log('response.data:', response.data)
+      console.log('response.data.success:', response.data?.success)
+      console.log('response.data.attendance:', response.data?.attendance)
+      console.log('Array.isArray(response.data.attendance):', Array.isArray(response.data?.attendance))
+      
+      // The response structure is: response.data = { success: true, attendance: [...], pagination: {...} }
+      if (response.data && response.data.success && response.data.attendance && Array.isArray(response.data.attendance)) {
+        console.log('✅ Condition passed! Processing attendance records...')
+        console.log('Attendance records:', response.data.attendance)
+        
         const formattedData = response.data.attendance.map((record) => {
           const workHours = calculateWorkHours(record.checkIn, record.checkOut)
           const extraHours = calculateExtraHours(record.checkIn, record.checkOut, workHours)
@@ -80,6 +76,7 @@ export default function Attendance() {
           }
         })
         
+        console.log('Formatted attendance data:', formattedData)
         setAttendanceData(formattedData)
         
         // Calculate stats
@@ -88,9 +85,57 @@ export default function Attendance() {
         const late = formattedData.filter(r => r.checkIn !== '-' && isLate(r.checkIn)).length
         
         setStats({ present, absent, late })
+      } else {
+        console.log('❌ Condition failed!')
+        console.log('response.data exists?', !!response.data)
+        console.log('response.data.success?', response.data?.success)
+        console.log('response.data.attendance exists?', !!response.data?.attendance)
+        console.log('is array?', Array.isArray(response.data?.attendance))
+        
+        // Try alternative access patterns
+        const attendanceArray = response.data?.attendance || response.attendance || []
+        console.log('Trying alternative access - attendanceArray:', attendanceArray)
+        
+        if (attendanceArray && attendanceArray.length > 0) {
+          console.log('Found attendance via alternative access, processing...')
+          const formattedData = attendanceArray.map((record) => {
+            const workHours = calculateWorkHours(record.checkIn, record.checkOut)
+            const extraHours = calculateExtraHours(record.checkIn, record.checkOut, workHours)
+            
+            return {
+              id: record._id,
+              employee: record.empId?.name || record.userId?.name || 'Unknown',
+              employeeId: record.empId?.employeeId || record.userId?.email || 'N/A',
+              role: record.userId?.role || 'Employee',
+              date: new Date(record.date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+              }),
+              checkIn: record.checkIn ? new Date(record.checkIn).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
+              checkOut: record.checkOut ? new Date(record.checkOut).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
+              status: record.status || 'present',
+              workHours,
+              extraHours
+            }
+          })
+          
+          console.log('Alternative formatted data:', formattedData)
+          setAttendanceData(formattedData)
+          
+          const present = formattedData.filter(r => r.status === 'present' && r.checkIn !== '-').length
+          const absent = formattedData.filter(r => r.status === 'absent' || r.checkIn === '-').length
+          const late = formattedData.filter(r => r.checkIn !== '-' && isLate(r.checkIn)).length
+          
+          setStats({ present, absent, late })
+        } else {
+          console.log('No attendance data in response or response not successful')
+          setAttendanceData([])
+        }
       }
     } catch (error) {
       console.error('Error fetching attendance:', error)
+      setAttendanceData([])
     } finally {
       setLoading(false)
     }
@@ -200,22 +245,6 @@ export default function Attendance() {
               <p className="text-blue-100">Track and manage employee attendance records</p>
             </div>
           </div>
-          <button 
-            onClick={handleMarkAttendance}
-            disabled={markingAttendance || (userAttendanceStatus && userAttendanceStatus.checkIn)}
-            className={`flex items-center gap-2 px-5 py-3 rounded-xl font-semibold shadow-md transition-all ${
-              userAttendanceStatus && userAttendanceStatus.checkIn
-                ? 'bg-green-500 text-white cursor-not-allowed'
-                : 'bg-white text-blue-700 hover:bg-blue-50'
-            } ${markingAttendance ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            <FaUserCheck /> 
-            {userAttendanceStatus && userAttendanceStatus.checkIn 
-              ? 'Attendance Marked' 
-              : markingAttendance 
-              ? 'Marking...' 
-              : 'Mark Attendance'}
-          </button>
         </div>
       </section>
 

@@ -11,13 +11,25 @@ class AttendanceService {
   async getAllAttendance(query = {}) {
     const { page = 1, limit = 10, employeeId, startDate, endDate } = query;
     
+    console.log('getAllAttendance - query:', query);
+    
     const filter = {};
     if (employeeId) filter.empId = employeeId;
     if (startDate || endDate) {
       filter.date = {};
-      if (startDate) filter.date.$gte = new Date(startDate);
-      if (endDate) filter.date.$lte = new Date(endDate);
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        filter.date.$gte = start;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.date.$lte = end;
+      }
     }
+
+    console.log('getAllAttendance - filter:', filter);
 
     const skip = (page - 1) * limit;
     const attendance = await Attendance.find(filter)
@@ -26,6 +38,9 @@ class AttendanceService {
       .limit(parseInt(limit))
       .skip(skip)
       .sort({ date: -1 });
+
+    console.log('getAllAttendance - found records:', attendance.length);
+    console.log('getAllAttendance - records:', attendance);
 
     const total = await Attendance.countDocuments(filter);
 
@@ -196,10 +211,15 @@ class AttendanceService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
+    console.log('getTodayUserAttendance - userId:', userId);
+    console.log('getTodayUserAttendance - date range:', { today, tomorrow });
+
     const attendance = await Attendance.findOne({
       userId,
       date: { $gte: today, $lt: tomorrow }
     }).populate('userId', 'name email role');
+
+    console.log('getTodayUserAttendance - found:', attendance);
 
     return attendance;
   }
@@ -210,14 +230,20 @@ class AttendanceService {
   async userCheckIn(userId) {
     const User = require('../models/User');
     
+    console.log('userCheckIn - userId:', userId);
+    
     // Check if user exists
     const user = await User.findById(userId);
     if (!user) {
       throw new Error('User not found');
     }
+    
+    console.log('userCheckIn - user found:', user.name, user.role);
 
     // Check if already checked in today
     const existingAttendance = await this.getTodayUserAttendance(userId);
+    
+    console.log('userCheckIn - existing attendance:', existingAttendance);
     
     if (existingAttendance) {
       if (existingAttendance.checkIn) {
@@ -227,6 +253,7 @@ class AttendanceService {
       existingAttendance.checkIn = new Date();
       existingAttendance.status = 'present';
       await existingAttendance.save();
+      console.log('userCheckIn - updated existing:', existingAttendance);
       return existingAttendance;
     }
 
@@ -238,6 +265,8 @@ class AttendanceService {
       status: 'present'
     });
 
+    console.log('userCheckIn - created new:', attendance);
+
     return await this.getTodayUserAttendance(userId);
   }
 
@@ -245,7 +274,11 @@ class AttendanceService {
    * User check-out (for Admin, HR, PayrollOfficer, Employee)
    */
   async userCheckOut(userId) {
+    console.log('userCheckOut - userId:', userId);
+    
     const attendance = await this.getTodayUserAttendance(userId);
+    
+    console.log('userCheckOut - found attendance:', attendance);
     
     if (!attendance) {
       throw new Error('No check-in record found for today');
@@ -261,6 +294,8 @@ class AttendanceService {
 
     attendance.checkOut = new Date();
     await attendance.save();
+
+    console.log('userCheckOut - updated attendance:', attendance);
 
     return attendance;
   }

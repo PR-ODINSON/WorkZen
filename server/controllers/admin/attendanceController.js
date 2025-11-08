@@ -62,7 +62,11 @@ exports.remove = async (req, res) => {
 exports.markUserAttendance = async (req, res) => {
   try {
     const userId = req.user.id; // From JWT token
+    console.log('Mark user attendance - userId:', userId);
+    
     const attendance = await attendanceService.userCheckIn(userId);
+    console.log('Created attendance:', attendance);
+    
     return success(res, { attendance }, 200);
   } catch (err) {
     console.error('Mark user attendance error:', err);
@@ -76,10 +80,32 @@ exports.markUserAttendance = async (req, res) => {
 exports.getTodayUserStatus = async (req, res) => {
   try {
     const userId = req.user.id; // From JWT token
+    console.log('Get today user status - userId:', userId);
+    
     const attendance = await attendanceService.getTodayUserAttendance(userId);
+    console.log('Found attendance:', attendance);
+    
     return success(res, { attendance });
   } catch (err) {
     console.error('Get today user status error:', err);
     return error(res, err.message);
+  }
+};
+
+/**
+ * Check out for logged-in user (Admin, HR, PayrollOfficer)
+ */
+exports.checkOutUser = async (req, res) => {
+  try {
+    const userId = req.user.id; // From JWT token
+    console.log('Check out user - userId:', userId);
+    
+    const attendance = await attendanceService.userCheckOut(userId);
+    console.log('Checked out attendance:', attendance);
+    
+    return success(res, { attendance }, 200);
+  } catch (err) {
+    console.error('Check out user error:', err);
+    return error(res, err.message, 400);
   }
 };

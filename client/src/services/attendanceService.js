@@ -86,6 +86,14 @@ export const attendanceService = {
   },
 
   /**
+   * Check out for logged-in user (Admin, HR, PayrollOfficer)
+   */
+  checkOutUser: async () => {
+    const response = await api.post('/admin/attendance/checkout');
+    return response.data;
+  },
+
+  /**
    * Get today's attendance status for logged-in user
    */
   getTodayUserStatus: async () => {

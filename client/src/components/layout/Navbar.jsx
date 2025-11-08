@@ -35,6 +35,21 @@ const Navbar = () => {
       // For Admin, HR, PayrollOfficer
       fetchUserAttendanceStatus()
     }
+
+    // Listen for attendance updates
+    const handleAttendanceUpdate = () => {
+      if (userRole === 'Employee') {
+        fetchTodayStatus()
+      } else {
+        fetchUserAttendanceStatus()
+      }
+    }
+
+    window.addEventListener('attendanceUpdated', handleAttendanceUpdate)
+    
+    return () => {
+      window.removeEventListener('attendanceUpdated', handleAttendanceUpdate)
+    }
   }, [userRole])
 
   const fetchTodayStatus = async () => {
@@ -49,8 +64,13 @@ const Navbar = () => {
 
   const fetchUserAttendanceStatus = async () => {
     try {
+      console.log('Fetching user attendance status...')
       const response = await attendanceService.getTodayUserStatus()
-      setUserAttendanceStatus(response.data?.attendance || null)
+      console.log('User attendance status response:', response)
+      
+      const attendance = response.data?.attendance || response.attendance
+      setUserAttendanceStatus(attendance)
+      console.log('Set userAttendanceStatus to:', attendance)
     } catch (error) {
       console.error('Error fetching user attendance status:', error)
       setUserAttendanceStatus(null)
@@ -103,6 +123,74 @@ const Navbar = () => {
     }
   }
 
+  const handleUserCheckIn = async () => {
+    setLoading(true)
+    try {
+      console.log('Marking user attendance...')
+      const response = await attendanceService.markUserAttendance()
+      console.log('Attendance response:', response)
+      
+      const attendance = response.data?.attendance || response.attendance
+      console.log('Extracted attendance:', attendance)
+      
+      // Force state update
+      setUserAttendanceStatus(null)
+      setTimeout(() => {
+        setUserAttendanceStatus(attendance)
+        console.log('Updated userAttendanceStatus:', attendance)
+      }, 0)
+      
+      alert('✅ Attendance marked successfully!')
+      
+      // Re-fetch to ensure we have the latest data
+      setTimeout(() => {
+        fetchUserAttendanceStatus()
+      }, 100)
+      
+      // Notify other components about attendance update
+      window.dispatchEvent(new Event('attendanceUpdated'))
+    } catch (error) {
+      console.error('User check-in error:', error)
+      alert(error.response?.data?.message || 'Failed to mark attendance. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleUserCheckOut = async () => {
+    setLoading(true)
+    try {
+      console.log('Checking out user...')
+      const response = await attendanceService.checkOutUser()
+      console.log('Check-out response:', response)
+      
+      const attendance = response.data?.attendance || response.attendance
+      console.log('Extracted attendance:', attendance)
+      
+      // Force state update
+      setUserAttendanceStatus(null)
+      setTimeout(() => {
+        setUserAttendanceStatus(attendance)
+        console.log('Updated userAttendanceStatus:', attendance)
+      }, 0)
+      
+      alert('✅ Checked out successfully!')
+      
+      // Re-fetch to ensure we have the latest data
+      setTimeout(() => {
+        fetchUserAttendanceStatus()
+      }, 100)
+      
+      // Notify other components about attendance update
+      window.dispatchEvent(new Event('attendanceUpdated'))
+    } catch (error) {
+      console.error('User check-out error:', error)
+      alert(error.response?.data?.message || 'Failed to check out. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
@@ -123,6 +211,11 @@ const Navbar = () => {
     const date = new Date(dateString)
     return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
   }
+
+  // Debug logging
+  console.log('Navbar render - userRole:', userRole)
+  console.log('Navbar render - userAttendanceStatus:', userAttendanceStatus)
+  console.log('Navbar render - has checkIn:', userAttendanceStatus?.checkIn)
 
   return (
     <header className=" bg-white fixed top-0 right-0 left-0 z-30 flex items-center  w-full justify-between px-6 py-2">
@@ -197,23 +290,82 @@ const Navbar = () => {
           </div>
         )}
 
+        {/* Check In Button and Status Indicator for Admin, HR, PayrollOfficer */}
+        {(userRole === 'Admin' || userRole === 'HR' || userRole === 'PayrollOfficer') && (
+          <div className="flex items-center gap-3 border-r border-slate-200 pr-4">
+            {/* Check In Button - Show if not checked in */}
+            {!userAttendanceStatus?.checkIn && (
+              <button
+                onClick={handleUserCheckIn}
+                disabled={loading}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all bg-blue-600 text-white hover:bg-blue-700 active:scale-95 ${
+                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Check In</span>
+              </button>
+            )}
+
+            {/* Check Out Button - Show if checked in but not checked out */}
+            {userAttendanceStatus?.checkIn && !userAttendanceStatus?.checkOut && (
+              <button
+                onClick={handleUserCheckOut}
+                disabled={loading}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all bg-red-600 text-white hover:bg-red-700 active:scale-95 ${
+                  loading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span>Check Out</span>
+              </button>
+            )}
+
+            {/* Both checked in and out - Show status */}
+            {userAttendanceStatus?.checkIn && userAttendanceStatus?.checkOut && (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 text-green-700 font-medium text-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>In: {formatTime(userAttendanceStatus.checkIn)}</span>
+                </div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 text-red-700 font-medium text-sm">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>Out: {formatTime(userAttendanceStatus.checkOut)}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Attendance Status Indicator - Red/Green Dot */}
+            <div 
+              className={`w-6 h-6 rounded-full ${
+                userAttendanceStatus?.checkIn ? 'bg-green-500' : 'bg-red-500'
+              }`} 
+              title={
+                userAttendanceStatus?.checkIn 
+                  ? 'Checked in' 
+                  : 'Not checked in'
+              }
+            ></div>
+          </div>
+        )}
+
         {/* Profile Button */}
         <div className="relative" ref={dropdownRef}>
           <div
             
             className="flex items-center gap-3 rounded-lg px-3 py-2 transition-colors"
           >
-            {/* Avatar Circle with Attendance Indicator */}
-            <div className="relative">
-              <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-              {/* Attendance Status Indicator - for Admin, HR, PayrollOfficer */}
-              {userRole !== 'Employee' && (
-                <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
-                  userAttendanceStatus && userAttendanceStatus.checkIn ? 'bg-green-500' : 'bg-red-500'
-                }`} title={userAttendanceStatus && userAttendanceStatus.checkIn ? 'Attendance marked' : 'Attendance not marked'}></div>
-              )}
+            {/* Avatar Circle */}
+            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
+              {userName.charAt(0).toUpperCase()}
             </div>
             <div className="text-left hidden md:block">
               <p className="text-sm font-medium text-slate-800">{userName}</p>
