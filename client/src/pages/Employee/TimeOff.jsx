@@ -36,19 +36,43 @@ export default function EmployeeTimeOff() {
   const fetchData = async () => {
     setLoading(true)
     try {
+      console.log('Fetching employee leave data...')
+      
       // Fetch leave requests
-      const requestsResponse = await leaveService.getMyRequests({ year: new Date().getFullYear() })
-      if (requestsResponse.success) {
-        setLeaveRequests(requestsResponse.data?.leaves || [])
+      const requestsResponse = await leaveService.getMyRequests({ 
+        year: new Date().getFullYear(),
+        limit: 100 
+      })
+      
+      console.log('Leave requests response:', requestsResponse)
+      console.log('Response data:', requestsResponse.data)
+      console.log('Response leaves:', requestsResponse.leaves)
+      
+      // Handle both response patterns
+      const leavesArray = requestsResponse.data?.leaves || requestsResponse.leaves || []
+      
+      if (leavesArray && leavesArray.length > 0) {
+        console.log('Leave requests found:', leavesArray)
+        setLeaveRequests(leavesArray)
+      } else {
+        console.log('No leave requests found')
+        setLeaveRequests([])
       }
 
       // Fetch leave balance
       const balanceResponse = await leaveService.getBalance()
-      if (balanceResponse.success) {
-        setLeaveBalance(balanceResponse.data?.balance || null)
+      console.log('Leave balance response:', balanceResponse)
+      
+      if (balanceResponse.success || balanceResponse.data) {
+        const balance = balanceResponse.data?.balance || balanceResponse.balance
+        console.log('Leave balance:', balance)
+        setLeaveBalance(balance)
       }
     } catch (error) {
       console.error('Error fetching data:', error)
+      console.error('Error response:', error.response?.data)
+      setLeaveRequests([])
+      setLeaveBalance(null)
     } finally {
       setLoading(false)
     }
@@ -221,31 +245,47 @@ export default function EmployeeTimeOff() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Time Off</h1>
-          <p className="text-slate-600 mt-1">Manage your leave requests</p>
+      {/* Header Section */}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-xl p-8">
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <div className="flex items-center gap-4 mb-1">
+                <h1 className="text-4xl font-bold">Time Off</h1>
+                <div className="text-sm bg-white/20 px-4 py-1.5 rounded-lg backdrop-blur-sm">
+                  <span className="font-semibold">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                  <span className="mx-2">•</span>
+                  <span>{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()]}</span>
+                </div>
+              </div>
+              <p className="text-purple-100 text-base">Manage your leave requests</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowNewRequestModal(true)}
+            className="px-6 py-3 bg-white text-purple-700 rounded-lg hover:bg-purple-50 transition-colors shadow-md flex items-center gap-2 font-semibold"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            NEW
+          </button>
         </div>
-        
-        <button
-          onClick={() => setShowNewRequestModal(true)}
-          className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md flex items-center gap-2"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          NEW
-        </button>
-      </div>
+      </section>
 
       {/* Leave Balance Cards */}
       {leaveBalance && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Paid Time Off */}
-          <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-blue-600 mb-4">Paid time Off</h3>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <h3 className="text-base font-semibold text-blue-600 mb-3">Paid time Off</h3>
+            <div className="text-3xl font-bold text-slate-800 mb-3">
               {leaveBalance.paidTimeOff.available} Days Available
             </div>
             <div className="text-sm text-slate-600">
@@ -256,9 +296,9 @@ export default function EmployeeTimeOff() {
           </div>
 
           {/* Sick Time Off */}
-          <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-red-600 mb-4">Sick time off</h3>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <h3 className="text-base font-semibold text-orange-600 mb-3">Sick time off</h3>
+            <div className="text-3xl font-bold text-slate-800 mb-3">
               {leaveBalance.sickTimeOff.available} Days Available
             </div>
             <div className="text-sm text-slate-600">
@@ -269,9 +309,9 @@ export default function EmployeeTimeOff() {
           </div>
 
           {/* Unpaid Leave */}
-          <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-600 mb-4">Unpaid</h3>
-            <div className="text-3xl font-bold text-slate-800 mb-2">
+          <div className="bg-white rounded-xl shadow-md border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <h3 className="text-base font-semibold text-gray-600 mb-3">Unpaid</h3>
+            <div className="text-3xl font-bold text-slate-800 mb-3">
               {leaveBalance.unpaid?.used || 0} Days Used
             </div>
             <div className="text-sm text-slate-600">
@@ -282,62 +322,54 @@ export default function EmployeeTimeOff() {
       )}
 
       {/* Leave Requests Table */}
-      <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-md border border-purple-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 border-b-2 border-slate-200">
+            <thead className="bg-purple-50 border-b-2 border-purple-200">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Name</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Start Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">End Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Time off Type</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Days</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Actions</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900 uppercase tracking-wider">Start Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900 uppercase tracking-wider">End Date</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900 uppercase tracking-wider">Time off Type</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900 uppercase tracking-wider">Days</th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-purple-900 uppercase tracking-wider">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-purple-100">
               {loading ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-slate-500">
-                    <div className="flex justify-center items-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  <td colSpan="6" className="px-6 py-12 text-center text-purple-600">
+                    <div className="flex flex-col justify-center items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                      <p>Loading leave requests...</p>
                     </div>
                   </td>
                 </tr>
               ) : leaveRequests.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan="6" className="px-6 py-12 text-center text-purple-600">
                     No leave requests found
                   </td>
                 </tr>
               ) : (
                 leaveRequests.map((request) => (
-                  <tr key={request._id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4 text-sm text-slate-700">[Emp Name]</td>
+                  <tr key={request._id} className="hover:bg-purple-50 transition-colors">
+                    <td className="px-6 py-4 text-sm text-slate-700 font-medium">
+                      {request.empId?.name || userName}
+                    </td>
                     <td className="px-6 py-4 text-sm text-slate-700">{formatDate(request.startDate)}</td>
                     <td className="px-6 py-4 text-sm text-slate-700">{formatDate(request.endDate)}</td>
                     <td className="px-6 py-4 text-sm">
-                      <span className={`${
-                        request.leaveType === 'Paid time Off' ? 'text-blue-600' : 
-                        request.leaveType === 'Sick time off' ? 'text-red-600' : 
-                        'text-gray-600'
-                      } font-medium`}>
+                      <span className={`px-3 py-1 rounded-lg text-xs font-medium ${
+                        request.leaveType === 'Paid time Off' ? 'bg-blue-100 text-blue-700' : 
+                        request.leaveType === 'Sick time off' ? 'bg-orange-100 text-orange-700' : 
+                        'bg-gray-100 text-gray-700'
+                      }`}>
                         {request.leaveType}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-700">{request.numberOfDays}</td>
+                    <td className="px-6 py-4 text-sm text-slate-700 font-medium">{request.numberOfDays}</td>
                     <td className="px-6 py-4 text-sm">{getStatusBadge(request.status)}</td>
-                    <td className="px-6 py-4 text-sm">
-                      {request.status === 'pending' && (
-                        <button
-                          onClick={() => handleCancel(request._id)}
-                          className="text-red-600 hover:text-red-800 font-medium"
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </td>
                   </tr>
                 ))
               )}
