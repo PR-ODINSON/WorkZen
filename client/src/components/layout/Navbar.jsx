@@ -118,7 +118,11 @@ const Navbar = () => {
   }
 
   return (
-    <header className="h-16 bg-white shadow-md fixed top-0 right-0 left-60 z-30 flex items-center justify-between px-6">
+    <header className=" bg-[#fff0]  fixed top-0 right-0 left-0 z-30 flex items-center  w-full justify-between px-6">
+      {/* Left side - Title */}
+      <div className="flex items-center">
+      </div>
+
       {/* Right side - Attendance & Profile */}
       <div className="flex items-center gap-4">
         {/* Check-in/Check-out Buttons (Only for Employees) */}

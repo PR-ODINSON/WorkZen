@@ -43,3 +43,33 @@ exports.adminOnly = async (req, res, next) => {
     return res.status(500).json({ success:false, message:'Server error' });
   }
 };
+
+exports.hrOnly = async (req, res, next) => {
+  try {
+    if (!req.user) return res.status(401).json({ success:false, message:'Unauthorized' });
+    const user = await User.findById(req.user.id);
+    if (!user || user.role !== 'HR') return res.status(403).json({ success:false, message:'Forbidden: HR only' });
+    next();
+  } catch (err) {
+    return res.status(500).json({ success:false, message:'Server error' });
+  }
+};
+
+// Allow multiple roles
+exports.allowRoles = (...allowedRoles) => {
+  return async (req, res, next) => {
+    try {
+      if (!req.user) return res.status(401).json({ success:false, message:'Unauthorized' });
+      const user = await User.findById(req.user.id);
+      if (!user || !allowedRoles.includes(user.role)) {
+        return res.status(403).json({ 
+          success:false, 
+          message:`Forbidden: Only ${allowedRoles.join(', ')} allowed` 
+        });
+      }
+      next();
+    } catch (err) {
+      return res.status(500).json({ success:false, message:'Server error' });
+    }
+  };
+};
