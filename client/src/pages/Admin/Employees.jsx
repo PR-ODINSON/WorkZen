@@ -78,7 +78,8 @@ export default function Employees() {
         if (response.data.success) {
           await fetchEmployees()
           handleCloseFormModal()
-          alert(`Employee added successfully! Default password: Welcome@123`)
+          const loginId = response.data.loginId
+          alert(`Employee added successfully!\n\nLogin ID: ${loginId}\nDefault Password: Welcome@123\n\nPlease share these credentials with the employee.`)
         }
       }
     } catch (err) {

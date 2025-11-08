@@ -1,6 +1,7 @@
 const Employee = require('../models/Employee');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
+const authService = require('./authService');
 
 /**
  * Employee Service - Business logic for employee management
@@ -49,7 +50,7 @@ class EmployeeService {
    */
   async getEmployeeById(id) {
     const employee = await Employee.findById(id)
-      .populate('userId', 'name email role');
+      .populate('userId', 'name email role loginId');
 
     if (!employee) {
       throw new Error('Employee not found');
@@ -62,7 +63,7 @@ class EmployeeService {
    * Create new employee
    */
   async createEmployee(employeeData) {
-    const { email, password, name, role, ...otherData } = employeeData;
+    const { email, password, name, role, joiningDate, ...otherData } = employeeData;
 
     // Check if email already exists
     const existingUser = await User.findOne({ email });
@@ -74,12 +75,22 @@ class EmployeeService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password || 'Welcome@123', salt);
 
+    // Determine joining year from joiningDate or use current year
+    const joiningYear = joiningDate 
+      ? new Date(joiningDate).getFullYear() 
+      : new Date().getFullYear();
+
+    // Generate Login ID using authService method
+    const loginId = await authService.generateLoginId(name, joiningYear);
+
     // Create user account with specified role or default to Employee
     const user = await User.create({
       name: name,
       email,
       password: hashedPassword,
       role: role || 'Employee',
+      loginId,
+      joiningYear,
     });
 
     // Create employee record
@@ -87,6 +98,7 @@ class EmployeeService {
       userId: user._id,
       name,
       email,
+      joiningDate: joiningDate ? new Date(joiningDate) : undefined,
       ...otherData,
     });
 

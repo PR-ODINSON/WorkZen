@@ -19,7 +19,13 @@ exports.list = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const employee = await employeeService.createEmployee(req.body);
-    return success(res, { employee }, 201);
+    // The employee is already populated with userId from getEmployeeById
+    const loginId = employee.userId?.loginId;
+    return success(res, { 
+      employee,
+      message: 'Employee created successfully',
+      loginId: loginId
+    }, 201);
   } catch (err) {
     console.error('Create employee error:', err);
     return error(res, err.message, 400);

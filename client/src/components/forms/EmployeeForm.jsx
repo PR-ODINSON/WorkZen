@@ -131,7 +131,6 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
             className={'w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 ' + (errors.role ? 'border-red-500' : 'border-slate-300')}
           >
             <option value="">Select Role</option>
-            <option value="Admin">Admin</option>
             <option value="HR">HR</option>
             <option value="PayrollOfficer">Payroll Officer</option>
             <option value="Employee">Employee</option>
