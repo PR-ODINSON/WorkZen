@@ -44,8 +44,15 @@ const Navbar = () => {
 
   const fetchUserAttendanceStatus = async () => {
     try {
-      console.log('Fetching user attendance status...')
-      const response = await attendanceService.getTodayUserStatus()
+      console.log('Fetching user attendance status for role:', userRole)
+      let response
+      
+      if (userRole === 'Employee') {
+        response = await attendanceService.getTodayStatus()
+      } else {
+        response = await attendanceService.getTodayUserStatus()
+      }
+      
       console.log('User attendance status response:', response)
       
       const attendance = response.data?.attendance || response.attendance
@@ -72,9 +79,16 @@ const Navbar = () => {
   const handleUserCheckIn = async () => {
     setLoading(true)
     try {
-      console.log('Marking user attendance...')
-      const response = await attendanceService.markUserAttendance()
-      console.log('Attendance response:', response)
+      console.log('Checking in user with role:', userRole)
+      let response
+      
+      if (userRole === 'Employee') {
+        response = await attendanceService.checkIn()
+      } else {
+        response = await attendanceService.markUserAttendance()
+      }
+      
+      console.log('Check-in response:', response)
       
       const attendance = response.data?.attendance || response.attendance
       console.log('Extracted attendance:', attendance)
@@ -86,7 +100,7 @@ const Navbar = () => {
         console.log('Updated userAttendanceStatus:', attendance)
       }, 0)
       
-      alert('✅ Attendance marked successfully!')
+      alert('✅ Checked in successfully!')
       
       // Re-fetch to ensure we have the latest data
       setTimeout(() => {
@@ -97,7 +111,7 @@ const Navbar = () => {
       window.dispatchEvent(new Event('attendanceUpdated'))
     } catch (error) {
       console.error('User check-in error:', error)
-      alert(error.response?.data?.message || 'Failed to mark attendance. Please try again.')
+      alert(error.response?.data?.message || 'Failed to check in. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -106,8 +120,15 @@ const Navbar = () => {
   const handleUserCheckOut = async () => {
     setLoading(true)
     try {
-      console.log('Checking out user...')
-      const response = await attendanceService.checkOutUser()
+      console.log('Checking out user with role:', userRole)
+      let response
+      
+      if (userRole === 'Employee') {
+        response = await attendanceService.checkOut()
+      } else {
+        response = await attendanceService.checkOutUser()
+      }
+      
       console.log('Check-out response:', response)
       
       const attendance = response.data?.attendance || response.attendance
@@ -155,7 +176,11 @@ const Navbar = () => {
   const formatTime = (dateString) => {
     if (!dateString) return '--:--'
     const date = new Date(dateString)
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true // AM/PM format
+    })
   }
 
   // Debug logging

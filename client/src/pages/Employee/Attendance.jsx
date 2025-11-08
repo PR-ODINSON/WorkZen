@@ -3,7 +3,6 @@ import attendanceService from '../../services/attendanceService'
 
 export default function EmployeeAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState([])
-  const [todayAttendance, setTodayAttendance] = useState(null)
   const [loading, setLoading] = useState(true)
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [showMonthPicker, setShowMonthPicker] = useState(false)
@@ -31,11 +30,6 @@ export default function EmployeeAttendance() {
   const fetchAttendanceData = async () => {
     setLoading(true)
     try {
-      // Get today's attendance
-      const todayResponse = await attendanceService.getTodayStatus()
-      console.log('Today attendance response:', todayResponse)
-      setTodayAttendance(todayResponse.data?.attendance || null)
-
       // Get all attendance for current month (my records only)
       const startOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
       const endOfMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0, 23, 59, 59)
@@ -51,11 +45,16 @@ export default function EmployeeAttendance() {
         limit: 100
       })
 
-      console.log('Attendance response:', response)
+      console.log('Full Attendance response:', response)
+      console.log('Response data:', response.data)
 
-      if (response.success && response.data?.attendance) {
-        const records = response.data.attendance
-        console.log('Attendance records:', records)
+      // Handle Axios response structure (response.data contains the actual API response)
+      const apiResponse = response.data || response
+      console.log('API Response:', apiResponse)
+
+      if (apiResponse.success !== false && apiResponse.attendance) {
+        const records = apiResponse.attendance
+        console.log('Attendance records found:', records.length, records)
         setAttendanceRecords(records)
         
         // Calculate stats
@@ -64,6 +63,21 @@ export default function EmployeeAttendance() {
         const workingDays = getWorkingDaysInMonth(currentMonth)
         
         console.log('Stats:', { presentCount, leaveCount, workingDays })
+        
+        setStats({
+          present: presentCount,
+          leaves: leaveCount,
+          totalWorkingDays: workingDays
+        })
+      } else if (apiResponse.data?.attendance) {
+        // Alternative structure
+        const records = apiResponse.data.attendance
+        console.log('Attendance records found (nested):', records.length, records)
+        setAttendanceRecords(records)
+        
+        const presentCount = records.filter(r => r.status === 'present' || r.checkIn).length
+        const leaveCount = records.filter(r => r.status === 'leave').length
+        const workingDays = getWorkingDaysInMonth(currentMonth)
         
         setStats({
           present: presentCount,
@@ -113,7 +127,11 @@ export default function EmployeeAttendance() {
   const formatTime = (dateString) => {
     if (!dateString) return '-'
     const date = new Date(dateString)
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+    return date.toLocaleTimeString('en-US', { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      hour12: true // AM/PM format
+    })
   }
 
   const formatDate = (dateString) => {
@@ -159,21 +177,35 @@ export default function EmployeeAttendance() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800">Attendance</h1>
-          <p className="text-slate-600 mt-1">Track your attendance records</p>
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-xl p-8">
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <div className="flex items-center gap-4 mb-1">
+              <h1 className="text-4xl font-bold">Attendance</h1>
+              <div className="text-sm bg-white/20 px-4 py-1.5 rounded-lg backdrop-blur-sm">
+                <span className="font-semibold">{currentMonth.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                <span className="mx-2">•</span>
+                <span>{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][new Date().getDay()]}</span>
+              </div>
+            </div>
+            <p className="text-purple-100 text-base">Track your attendance records</p>
+          </div>
         </div>
       </div>
 
       {/* Navigation Bar */}
-      <div className="bg-white rounded-lg shadow-md border border-slate-200 p-4">
+      <div className="bg-white rounded-xl shadow-md border border-purple-200 p-5">
         <div className="flex items-center justify-between">
           {/* Navigation Buttons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               onClick={goToPreviousMonth}
-              className="w-10 h-10 border-2 border-slate-300 rounded-lg hover:bg-slate-50 flex items-center justify-center transition-colors"
+              className="w-10 h-10 border-2 border-purple-300 rounded-lg hover:bg-purple-50 flex items-center justify-center transition-colors text-purple-700"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -181,7 +213,7 @@ export default function EmployeeAttendance() {
             </button>
             <button
               onClick={goToNextMonth}
-              className="w-10 h-10 border-2 border-slate-300 rounded-lg hover:bg-slate-50 flex items-center justify-center transition-colors"
+              className="w-10 h-10 border-2 border-purple-300 rounded-lg hover:bg-purple-50 flex items-center justify-center transition-colors text-purple-700"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -192,22 +224,25 @@ export default function EmployeeAttendance() {
             <div className="ml-2 relative">
               <button
                 onClick={() => setShowMonthPicker(!showMonthPicker)}
-                className="px-4 py-2 border-2 border-slate-300 rounded-lg min-w-[100px] text-center hover:bg-slate-50 transition-colors"
+                className="px-6 py-2 border-2 border-purple-300 rounded-lg min-w-[120px] text-center hover:bg-purple-50 transition-colors text-purple-700 font-medium flex items-center justify-center gap-2"
               >
-                {currentMonthName} ▼
+                {currentMonthName}
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </button>
               
               {/* Month Picker Dropdown */}
               {showMonthPicker && (
-                <div className="absolute top-full mt-2 left-0 bg-white border-2 border-slate-300 rounded-lg shadow-lg z-50 grid grid-cols-3 gap-2 p-3 min-w-[300px]">
+                <div className="absolute top-full mt-2 left-0 bg-white border-2 border-purple-300 rounded-lg shadow-lg z-50 grid grid-cols-3 gap-2 p-3 min-w-[300px]">
                   {monthNamesShort.map((month, index) => (
                     <button
                       key={month}
                       onClick={() => handleMonthSelect(index)}
                       className={`px-3 py-2 rounded-lg transition-colors ${
                         index === currentMonth.getMonth()
-                          ? 'bg-indigo-600 text-white'
-                          : 'hover:bg-slate-100 text-slate-700'
+                          ? 'bg-purple-600 text-white'
+                          : 'hover:bg-purple-100 text-purple-700'
                       }`}
                     >
                       {month}
@@ -218,66 +253,56 @@ export default function EmployeeAttendance() {
             </div>
           </div>
 
-          {/* Stats */}
+          {/* Stats with Purple Theme */}
           <div className="flex items-center gap-6">
-            <div className="px-4 py-2 border-2 border-slate-300 rounded-lg">
-              <span className="text-slate-600">Count of days present: </span>
-              <span className="font-semibold">{stats.present}</span>
+            <div className="px-5 py-2.5 border-2 border-purple-300 rounded-lg bg-purple-50">
+              <span className="text-purple-700">Count of days present: </span>
+              <span className="font-bold text-purple-900">{stats.present}</span>
             </div>
-            <div className="px-4 py-2 border-2 border-slate-300 rounded-lg">
-              <span className="text-slate-600">Leaves count: </span>
-              <span className="font-semibold">{stats.leaves}</span>
+            <div className="px-5 py-2.5 border-2 border-purple-300 rounded-lg bg-purple-50">
+              <span className="text-purple-700">Leaves count: </span>
+              <span className="font-bold text-purple-900">{stats.leaves}</span>
             </div>
-            <div className="px-4 py-2 border-2 border-slate-300 rounded-lg">
-              <span className="text-slate-600">Total working days: </span>
-              <span className="font-semibold">{stats.totalWorkingDays}</span>
+            <div className="px-5 py-2.5 border-2 border-purple-300 rounded-lg bg-purple-50">
+              <span className="text-purple-700">Total working days: </span>
+              <span className="font-bold text-purple-900">{stats.totalWorkingDays}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Month Display */}
-      <div className="bg-white rounded-lg shadow-md border border-slate-200 p-4">
-        <div className="text-center text-lg font-medium text-slate-700">
-          {currentMonth.toLocaleDateString('en-GB', { 
-            day: 'numeric', 
-            month: 'long', 
-            year: 'numeric' 
-          })}
-        </div>
-      </div>
-
-      {/* Attendance Table */}
-      <div className="bg-white rounded-lg shadow-md border border-slate-200 overflow-hidden">
+      {/* Attendance Table with Purple Theme */}
+      <div className="bg-white rounded-xl shadow-md border border-purple-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-slate-50 border-b-2 border-slate-200">
+            <thead className="bg-purple-50 border-b-2 border-purple-200">
               <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Check In</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Check Out</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Work Hours</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-700">Extra hours</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Date</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Check In</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Check Out</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Work Hours</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-purple-900 uppercase tracking-wider">Extra hours</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-purple-100">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-slate-500">
-                    <div className="flex justify-center items-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                  <td colSpan="5" className="px-6 py-12 text-center text-purple-600">
+                    <div className="flex flex-col justify-center items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                      <p>Loading attendance data...</p>
                     </div>
                   </td>
                 </tr>
               ) : attendanceRecords.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-slate-500">
+                  <td colSpan="5" className="px-6 py-12 text-center text-purple-600">
                     No attendance records found for this month
                   </td>
                 </tr>
               ) : (
                 attendanceRecords.map((record) => (
-                  <tr key={record._id} className="hover:bg-slate-50 transition-colors">
+                  <tr key={record._id} className="hover:bg-purple-50 transition-colors">
                     <td className="px-6 py-4 text-sm text-slate-700">{formatDate(record.date)}</td>
                     <td className="px-6 py-4 text-sm text-slate-700">{formatTime(record.checkIn)}</td>
                     <td className="px-6 py-4 text-sm text-slate-700">{formatTime(record.checkOut)}</td>

@@ -11,12 +11,21 @@ const { success, error } = require('../utils/response');
 exports.getTodayStatus = async (req, res) => {
   try {
     const empId = req.user.empId; // Get employee ID from verified token
+    const userId = req.user.id; // Get user ID as fallback
     
-    if (!empId) {
-      return error(res, 'Employee profile not found', 404);
+    console.log('getTodayStatus - empId:', empId, 'userId:', userId);
+    
+    let attendance;
+    
+    if (empId) {
+      attendance = await attendanceService.getTodayAttendance(empId);
+    } else {
+      // Fallback to userId for employees without Employee profile
+      attendance = await attendanceService.getTodayUserAttendance(userId);
     }
-
-    const attendance = await attendanceService.getTodayAttendance(empId);
+    
+    console.log('getTodayStatus - attendance:', attendance);
+    
     return success(res, { attendance });
   } catch (err) {
     console.error('Get today attendance error:', err);
@@ -30,15 +39,24 @@ exports.getTodayStatus = async (req, res) => {
 exports.checkIn = async (req, res) => {
   try {
     const empId = req.user.empId; // Get employee ID from verified token
+    const userId = req.user.id; // Get user ID as fallback
     
     console.log('Check-in request from user:', req.user);
-    console.log('Employee ID:', empId);
+    console.log('Employee ID:', empId, 'User ID:', userId);
     
-    if (!empId) {
-      return error(res, 'Employee profile not found. Please contact admin to create your employee profile.', 404);
+    let attendance;
+    
+    if (empId) {
+      // Employee has an Employee profile, use empId
+      attendance = await attendanceService.checkIn(empId);
+    } else {
+      // Employee doesn't have Employee profile yet, use userId
+      console.log('No empId found, using userId for check-in');
+      attendance = await attendanceService.userCheckIn(userId);
     }
-
-    const attendance = await attendanceService.checkIn(empId);
+    
+    console.log('Check-in successful, attendance:', attendance);
+    
     return success(res, { 
       message: 'Checked in successfully',
       attendance 
@@ -55,12 +73,19 @@ exports.checkIn = async (req, res) => {
 exports.checkOut = async (req, res) => {
   try {
     const empId = req.user.empId; // Get employee ID from verified token
+    const userId = req.user.id; // Get user ID as fallback
     
-    if (!empId) {
-      return error(res, 'Employee profile not found', 404);
+    console.log('Check-out request - empId:', empId, 'userId:', userId);
+    
+    let attendance;
+    
+    if (empId) {
+      attendance = await attendanceService.checkOut(empId);
+    } else {
+      // Fallback to userId for employees without Employee profile
+      attendance = await attendanceService.userCheckOut(userId);
     }
-
-    const attendance = await attendanceService.checkOut(empId);
+    
     return success(res, { 
       message: 'Checked out successfully',
       attendance 
@@ -77,12 +102,24 @@ exports.checkOut = async (req, res) => {
 exports.getMyAttendance = async (req, res) => {
   try {
     const empId = req.user.empId; // Get employee ID from verified token
+    const userId = req.user.id; // Get user ID as fallback
     
-    if (!empId) {
-      return error(res, 'Employee profile not found', 404);
+    console.log('getMyAttendance - empId:', empId, 'userId:', userId);
+    console.log('getMyAttendance - query:', req.query);
+    
+    let result;
+    
+    if (empId) {
+      // Employee has an Employee profile, fetch by empId
+      result = await attendanceService.getEmployeeAttendance(empId, req.query);
+    } else {
+      // Employee doesn't have Employee profile, fetch by userId
+      console.log('No empId found, fetching by userId');
+      result = await attendanceService.getUserAttendance(userId, req.query);
     }
-
-    const result = await attendanceService.getEmployeeAttendance(empId, req.query);
+    
+    console.log('getMyAttendance - result:', result);
+    
     return success(res, result);
   } catch (err) {
     console.error('Get my attendance error:', err);

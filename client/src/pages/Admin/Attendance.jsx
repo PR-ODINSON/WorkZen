@@ -68,8 +68,16 @@ export default function Attendance() {
               day: 'numeric', 
               year: 'numeric' 
             }),
-            checkIn: record.checkIn ? new Date(record.checkIn).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
-            checkOut: record.checkOut ? new Date(record.checkOut).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
+            checkIn: record.checkIn ? new Date(record.checkIn).toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true // AM/PM format
+            }) : '-',
+            checkOut: record.checkOut ? new Date(record.checkOut).toLocaleTimeString('en-US', { 
+              hour: '2-digit', 
+              minute: '2-digit',
+              hour12: true // AM/PM format
+            }) : '-',
             status: record.status || 'present',
             workHours,
             extraHours
@@ -112,8 +120,16 @@ export default function Attendance() {
                 day: 'numeric', 
                 year: 'numeric' 
               }),
-              checkIn: record.checkIn ? new Date(record.checkIn).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
-              checkOut: record.checkOut ? new Date(record.checkOut).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : '-',
+              checkIn: record.checkIn ? new Date(record.checkIn).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true // AM/PM format
+              }) : '-',
+              checkOut: record.checkOut ? new Date(record.checkOut).toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true // AM/PM format
+              }) : '-',
               status: record.status || 'present',
               workHours,
               extraHours
@@ -225,61 +241,66 @@ export default function Attendance() {
   ]
 
   return (
-    <div className="min-h-screen rounded-3xl space-y-8">
+    <div className="min-h-screen space-y-6">
       {/* Header Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6">
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
-              <FaCalendarCheck className="text-white text-3xl" />
-            </div>
-            <div>
-              <div className="flex items-center gap-4">
-                <h1 className="text-3xl font-bold mb-1">Attendance</h1>
-                <div className="text-sm bg-white/20 px-3 py-1 rounded-lg backdrop-blur-sm">
-                  <span className="font-semibold">{dateInfo.date} {dateInfo.month} {dateInfo.year}</span>
-                  <span className="mx-2">•</span>
-                  <span>{dateInfo.dayName}</span>
-                </div>
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl p-8">
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
+            <FaCalendarCheck className="text-white text-3xl" />
+          </div>
+          <div>
+            <div className="flex items-center gap-4 mb-1">
+              <h1 className="text-4xl font-bold">Attendance</h1>
+              <div className="text-sm bg-white/20 px-4 py-1.5 rounded-lg backdrop-blur-sm">
+                <span className="font-semibold">{dateInfo.date} {dateInfo.month} {dateInfo.year}</span>
+                <span className="mx-2">•</span>
+                <span>{dateInfo.dayName}</span>
               </div>
-              <p className="text-blue-100">Track and manage employee attendance records</p>
             </div>
+            <p className="text-blue-100 text-base">Track and manage employee attendance records</p>
           </div>
         </div>
       </section>
 
       {/* Date Filter */}
-      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-4">
+      <section className="bg-white rounded-xl shadow-md border border-gray-200 p-5">
         <div className="flex items-center gap-4">
-          <label className="text-sm font-medium text-gray-700">Filter by Date:</label>
+          <label className="text-sm font-semibold text-gray-700">Filter by Date:</label>
           <input
             type="date"
             value={filters.startDate}
             onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           />
-          <span className="text-gray-500">to</span>
+          <span className="text-gray-600 font-medium">to</span>
           <input
             type="date"
             value={filters.endDate}
             onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           />
         </div>
       </section>
 
       {/* Table Section */}
-      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <FaUserClock className="text-blue-500" /> Daily Attendance Overview
-        </h2>
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading attendance data...</div>
-        ) : attendanceData.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No attendance data available</div>
-        ) : (
-          <Table columns={columns} data={attendanceData} />
-        )}
+      <section className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <FaUserClock className="text-blue-500" /> Daily Attendance Overview
+          </h2>
+        </div>
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2">Loading attendance data...</p>
+            </div>
+          ) : attendanceData.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No attendance data available</div>
+          ) : (
+            <Table columns={columns} data={attendanceData} />
+          )}
+        </div>
       </section>
     </div>
   )

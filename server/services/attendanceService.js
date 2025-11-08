@@ -301,10 +301,13 @@ class AttendanceService {
   }
 
   /**
-   * Get attendance records for a specific employee
+   * Get attendance records for a specific employee (by empId or userId)
    */
   async getEmployeeAttendance(empId, query = {}) {
     const { startDate, endDate, limit = 100 } = query;
+    
+    console.log('getEmployeeAttendance - empId:', empId);
+    console.log('getEmployeeAttendance - query:', query);
     
     const filter = { empId };
     
@@ -322,10 +325,54 @@ class AttendanceService {
       }
     }
 
+    console.log('getEmployeeAttendance - filter:', filter);
+
     const attendance = await Attendance.find(filter)
       .populate('empId', 'name email employeeId')
       .limit(parseInt(limit))
       .sort({ date: -1 });
+
+    console.log('getEmployeeAttendance - found attendance:', attendance.length);
+
+    return {
+      attendance,
+      total: attendance.length
+    };
+  }
+
+  /**
+   * Get attendance records for a user (by userId - for employees without Employee profile)
+   */
+  async getUserAttendance(userId, query = {}) {
+    const { startDate, endDate, limit = 100 } = query;
+    
+    console.log('getUserAttendance - userId:', userId);
+    console.log('getUserAttendance - query:', query);
+    
+    const filter = { userId };
+    
+    if (startDate || endDate) {
+      filter.date = {};
+      if (startDate) {
+        const start = new Date(startDate);
+        start.setHours(0, 0, 0, 0);
+        filter.date.$gte = start;
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        end.setHours(23, 59, 59, 999);
+        filter.date.$lte = end;
+      }
+    }
+
+    console.log('getUserAttendance - filter:', filter);
+
+    const attendance = await Attendance.find(filter)
+      .populate('userId', 'name email role')
+      .limit(parseInt(limit))
+      .sort({ date: -1 });
+
+    console.log('getUserAttendance - found attendance:', attendance.length);
 
     return {
       attendance,
