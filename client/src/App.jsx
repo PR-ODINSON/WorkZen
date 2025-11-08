@@ -100,18 +100,6 @@ export default function App() {
 
       {/* Admin Routes */}
       <Route
-        path="/admin/dashboard"
-        element={
-          <ProtectedRoute>
-            <RoleProtectedRoute allowedRoles={['Admin']}>
-              <SidebarLayout Sidebar={Admin.Sidebar}>
-                <Admin.Dashboard />
-              </SidebarLayout>
-            </RoleProtectedRoute>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/admin/employees"
         element={
           <ProtectedRoute>

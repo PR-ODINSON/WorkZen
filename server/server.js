@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const emailService = require('./utils/emailService');
 
 const app = express();
 
@@ -11,6 +12,9 @@ app.use(express.json());
 
 // Connect to MongoDB
 connectDB();
+
+// Initialize Email Service
+emailService.initialize();
 
 // Routes
 // Auth routes

@@ -2,6 +2,7 @@ const Employee = require('../models/Employee');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const authService = require('./authService');
+const emailService = require('../utils/emailService');
 
 /**
  * Employee Service - Business logic for employee management
@@ -70,9 +71,12 @@ class EmployeeService {
       throw new Error('Email already in use');
     }
 
+    // Use provided password or default
+    const plainPassword = password || 'Welcome@123';
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password || 'Welcome@123', salt);
+    const hashedPassword = await bcrypt.hash(plainPassword, salt);
 
     // Determine joining year from joiningDate or use current year
     const joiningYear = joiningDate 
@@ -99,6 +103,18 @@ class EmployeeService {
       email,
       joiningDate: joiningDate ? new Date(joiningDate) : undefined,
       ...otherData,
+    });
+
+    // Send welcome email with credentials (async, don't wait for it)
+    emailService.sendWelcomeEmail({
+      name: user.name,
+      email: user.email,
+      loginId: user.loginId,
+      role: user.role,
+      password: plainPassword,
+    }).catch(err => {
+      // Log error but don't fail the employee creation
+      console.error('Failed to send welcome email:', err.message);
     });
 
     return await this.getEmployeeById(employee._id);
