@@ -18,6 +18,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 
 // Admin routes
 app.use('/api/admin/employees', require('./routes/admin/employees'));
+app.use('/api/admin/users', require('./routes/admin/users'));
 app.use('/api/admin/attendance', require('./routes/admin/attendance'));
 app.use('/api/admin/payroll', require('./routes/admin/payroll'));
 app.use('/api/admin/timeoff', require('./routes/admin/timeoff'));
