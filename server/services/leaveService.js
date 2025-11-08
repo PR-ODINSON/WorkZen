@@ -12,13 +12,13 @@ class LeaveService {
     const { page = 1, limit = 10, employeeId, status, leaveType } = query;
     
     const filter = {};
-    if (employeeId) filter.employee = employeeId;
+    if (employeeId) filter.empId = employeeId;
     if (status) filter.status = status;
     if (leaveType) filter.leaveType = leaveType;
 
     const skip = (page - 1) * limit;
     const leaves = await Leave.find(filter)
-      .populate('employee', 'firstName lastName email')
+      .populate('empId', 'name email employeeId')
       .limit(parseInt(limit))
       .skip(skip)
       .sort({ createdAt: -1 });
@@ -41,7 +41,7 @@ class LeaveService {
    */
   async getLeaveById(id) {
     const leave = await Leave.findById(id)
-      .populate('employee', 'firstName lastName email');
+      .populate('empId', 'name email employeeId');
 
     if (!leave) {
       throw new Error('Leave request not found');
@@ -54,10 +54,10 @@ class LeaveService {
    * Create leave request
    */
   async createLeave(leaveData) {
-    const { employee } = leaveData;
+    const { empId } = leaveData;
 
     // Verify employee exists
-    const employeeExists = await Employee.findById(employee);
+    const employeeExists = await Employee.findById(empId);
     if (!employeeExists) {
       throw new Error('Employee not found');
     }
@@ -78,7 +78,7 @@ class LeaveService {
       id,
       updateData,
       { new: true, runValidators: true }
-    ).populate('employee', 'firstName lastName email');
+    ).populate('empId', 'name email employeeId');
 
     if (!leave) {
       throw new Error('Leave request not found');
@@ -100,7 +100,7 @@ class LeaveService {
       id,
       { status, remarks },
       { new: true, runValidators: true }
-    ).populate('employee', 'firstName lastName email');
+    ).populate('empId', 'name email employeeId');
 
     if (!leave) {
       throw new Error('Leave request not found');
