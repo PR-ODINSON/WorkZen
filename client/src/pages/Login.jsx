@@ -58,7 +58,7 @@ export default function Login() {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-bold text-slate-800">WorkZen HRMS</h1>
+            <h1 className="text-3xl font-bold text-slate-800">WorkZen</h1>
             <p className="text-slate-600 mt-2">Sign in to your account</p>
           </div>
 
