@@ -49,9 +49,7 @@ class EmployeeService {
    */
   async getEmployeeById(id) {
     const employee = await Employee.findById(id)
-      .populate('department', 'name')
-      .populate('designation', 'title')
-      .populate('user', 'name email role');
+      .populate('userId', 'name email role');
 
     if (!employee) {
       throw new Error('Employee not found');
@@ -64,7 +62,7 @@ class EmployeeService {
    * Create new employee
    */
   async createEmployee(employeeData) {
-    const { email, password, firstName, lastName, ...otherData } = employeeData;
+    const { email, password, name, role, ...otherData } = employeeData;
 
     // Check if email already exists
     const existingUser = await User.findOne({ email });
@@ -76,19 +74,18 @@ class EmployeeService {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password || 'Welcome@123', salt);
 
-    // Create user account
+    // Create user account with specified role or default to Employee
     const user = await User.create({
-      name: `${firstName} ${lastName}`,
+      name: name,
       email,
       password: hashedPassword,
-      role: 'employee',
+      role: role || 'Employee',
     });
 
     // Create employee record
     const employee = await Employee.create({
-      user: user._id,
-      firstName,
-      lastName,
+      userId: user._id,
+      name,
       email,
       ...otherData,
     });
