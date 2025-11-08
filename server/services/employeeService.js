@@ -27,11 +27,7 @@ class EmployeeService {
 
     const skip = (page - 1) * limit;
     const employees = await Employee.find(filter)
-<<<<<<< HEAD
       .populate('userId', 'name email loginId role')
-=======
-      .populate('userId', 'name email role loginId')
->>>>>>> 3e8a83e083def91375bb34d1124df76a643c923b
       .limit(parseInt(limit))
       .skip(skip)
       .sort({ createdAt: -1 });

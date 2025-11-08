@@ -78,30 +78,6 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-<<<<<<< HEAD
-      {/* ------------------ Admin Routes ------------------ */}
-      {[
-        { path: '/admin/dashboard', page: <Admin.Dashboard /> },
-        { path: '/admin/employees', page: <Admin.Employees /> },
-        { path: '/admin/attendance', page: <Admin.Attendance /> },
-        { path: '/admin/timeoff', page: <Admin.TimeOff /> },
-        { path: '/admin/payroll', page: <Admin.Payroll /> },
-        { path: '/admin/reports', page: <Admin.Reports /> },
-        { path: '/admin/profile', page: <Admin.MyProfile /> },
-      ].map(({ path, page }) => (
-        <Route
-          key={path}
-          path={path}
-          element={
-            <ProtectedRoute>
-              <RoleProtectedRoute allowedRoles={['Admin']}>
-                <SidebarLayout Sidebar={Admin.Sidebar}>{page}</SidebarLayout>
-              </RoleProtectedRoute>
-            </ProtectedRoute>
-          }
-        />
-      ))}
-=======
       {/* Admin Routes */}
       <Route
         path="/admin/employees"
@@ -187,7 +163,6 @@ export default function App() {
           </ProtectedRoute>
         }
       />
->>>>>>> 3e8a83e083def91375bb34d1124df76a643c923b
 
       {/* ------------------ HR Routes ------------------ */}
       {[
