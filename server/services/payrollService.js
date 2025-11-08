@@ -166,6 +166,96 @@ class PayrollService {
 
     return payrun;
   }
+
+  /**
+   * Get payroll dashboard data
+   */
+  async getPayrollDashboard() {
+    // Get all employees
+    const allEmployees = await Employee.find({});
+    
+    // Find employees without bank account
+    const employeesWithoutBank = allEmployees.filter(emp => 
+      !emp.bankAccountNumber || !emp.bankName
+    );
+    
+    // Find employees without manager
+    const employeesWithoutManager = allEmployees.filter(emp => 
+      !emp.manager || emp.manager.trim() === ''
+    );
+    
+    // Get recent payruns (last 6 months for chart)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    
+    const recentPayruns = await Payrun.find({
+      createdAt: { $gte: sixMonthsAgo }
+    }).sort({ year: 1, month: 1 });
+    
+    // Calculate employer cost and employee count per month
+    const monthlyData = {};
+    const currentDate = new Date();
+    
+    // Initialize last 3 months
+    for (let i = 2; i >= 0; i--) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
+      const monthName = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+      
+      monthlyData[monthKey] = {
+        month: monthName,
+        employerCost: 0,
+        employeeCount: 0,
+        year: date.getFullYear(),
+        monthNum: date.getMonth() + 1
+      };
+    }
+    
+    // Populate with actual payrun data
+    for (const payrun of recentPayruns) {
+      const monthKey = `${payrun.year}-${payrun.month}`;
+      if (monthlyData[monthKey]) {
+        // Get payroll records for this payrun
+        const payrolls = await Payroll.find({ 
+          month: payrun.month,
+          year: payrun.year
+        }).populate('empId');
+        
+        monthlyData[monthKey].employeeCount = payrolls.length;
+        monthlyData[monthKey].employerCost = payrolls.reduce((sum, p) => {
+          return sum + (p.gross || 0);
+        }, 0);
+      }
+    }
+    
+    const monthlyStats = Object.values(monthlyData);
+    
+    return {
+      warnings: {
+        employeesWithoutBank: employeesWithoutBank.map(emp => ({
+          id: emp._id,
+          name: emp.name,
+          employeeId: emp.employeeId,
+          email: emp.email
+        })),
+        employeesWithoutManager: employeesWithoutManager.map(emp => ({
+          id: emp._id,
+          name: emp.name,
+          employeeId: emp.employeeId,
+          email: emp.email
+        }))
+      },
+      payruns: recentPayruns.map(pr => ({
+        id: pr._id,
+        month: pr.month,
+        year: pr.year,
+        status: pr.status,
+        displayName: `Payrun for ${new Date(pr.year, pr.month - 1).toLocaleString('default', { month: 'short', year: 'numeric' })}`
+      })),
+      monthlyStats,
+      totalEmployees: allEmployees.length
+    };
+  }
 }
 
 module.exports = new PayrollService();

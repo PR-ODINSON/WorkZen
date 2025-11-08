@@ -18,7 +18,12 @@ const employeeSchema = new mongoose.Schema({
   bloodGroup: { type: String },
   manager: { type: String },
   location: { type: String },
-  employeeId: { type: String, unique: true }
+  employeeId: { type: String, unique: true },
+  // Bank details for payroll
+  bankName: { type: String },
+  bankAccountNumber: { type: String },
+  bankIFSC: { type: String },
+  bankBranch: { type: String }
 }, { timestamps: true });
 
 // Auto-generate employee ID before saving
