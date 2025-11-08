@@ -240,7 +240,7 @@ export default function EmployeeForm({ employee, onSubmit, onCancel }) {
           />
           {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
         </div>
-      </section>
+      </div>
 
       <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
         <button
