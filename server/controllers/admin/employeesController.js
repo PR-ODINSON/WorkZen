@@ -1,54 +1,57 @@
-const Employee = require('../../models/Employee');
+const employeeService = require('../../services/employeeService');
 const { success, error } = require('../../utils/response');
+
+/**
+ * Employee Controller - Handles HTTP requests for employee management
+ * Business logic is in employeeService
+ */
 
 exports.list = async (req, res) => {
   try {
-    const employees = await Employee.find().populate('userId', 'name email');
-    return success(res, { employees });
+    const result = await employeeService.getAllEmployees(req.query);
+    return success(res, result);
   } catch (err) {
-    console.error(err);
-    return error(res);
+    console.error('List employees error:', err);
+    return error(res, err.message);
   }
 };
 
 exports.create = async (req, res) => {
   try {
-    const data = req.body;
-    const emp = await Employee.create(data);
-    return success(res, { employee: emp }, 201);
+    const employee = await employeeService.createEmployee(req.body);
+    return success(res, { employee }, 201);
   } catch (err) {
-    console.error(err);
-    return error(res);
+    console.error('Create employee error:', err);
+    return error(res, err.message, 400);
   }
 };
 
 exports.get = async (req, res) => {
   try {
-    const emp = await Employee.findById(req.params.id).populate('userId', 'name email');
-    if (!emp) return error(res, 'Not found', 404);
-    return success(res, { employee: emp });
+    const employee = await employeeService.getEmployeeById(req.params.id);
+    return success(res, { employee });
   } catch (err) {
-    console.error(err);
-    return error(res);
+    console.error('Get employee error:', err);
+    return error(res, err.message, 404);
   }
 };
 
 exports.update = async (req, res) => {
   try {
-    const emp = await Employee.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    return success(res, { employee: emp });
+    const employee = await employeeService.updateEmployee(req.params.id, req.body);
+    return success(res, { employee });
   } catch (err) {
-    console.error(err);
-    return error(res);
+    console.error('Update employee error:', err);
+    return error(res, err.message, 400);
   }
 };
 
 exports.remove = async (req, res) => {
   try {
-    await Employee.findByIdAndDelete(req.params.id);
-    return success(res, { message: 'Deleted' });
+    const result = await employeeService.deleteEmployee(req.params.id);
+    return success(res, result);
   } catch (err) {
-    console.error(err);
-    return error(res);
+    console.error('Delete employee error:', err);
+    return error(res, err.message, 404);
   }
 };
