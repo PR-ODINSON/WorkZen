@@ -6,7 +6,7 @@ import api from '../api';
 
 export const attendanceService = {
   /**
-   * Get all attendance records
+   * Get all attendance records (Admin)
    */
   getAll: async (params = {}) => {
     const response = await api.get('/admin/attendance', { params });
@@ -14,7 +14,7 @@ export const attendanceService = {
   },
 
   /**
-   * Get attendance by ID
+   * Get attendance by ID (Admin)
    */
   getById: async (id) => {
     const response = await api.get(`/admin/attendance/${id}`);
@@ -22,7 +22,7 @@ export const attendanceService = {
   },
 
   /**
-   * Create attendance record
+   * Create attendance record (Admin)
    */
   create: async (attendanceData) => {
     const response = await api.post('/admin/attendance', attendanceData);
@@ -30,7 +30,7 @@ export const attendanceService = {
   },
 
   /**
-   * Update attendance record
+   * Update attendance record (Admin)
    */
   update: async (id, attendanceData) => {
     const response = await api.put(`/admin/attendance/${id}`, attendanceData);
@@ -38,10 +38,34 @@ export const attendanceService = {
   },
 
   /**
-   * Delete attendance record
+   * Delete attendance record (Admin)
    */
   delete: async (id) => {
     const response = await api.delete(`/admin/attendance/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Get today's attendance status for logged-in employee
+   */
+  getTodayStatus: async () => {
+    const response = await api.get('/attendance/today');
+    return response.data;
+  },
+
+  /**
+   * Employee check-in
+   */
+  checkIn: async () => {
+    const response = await api.post('/attendance/checkin');
+    return response.data;
+  },
+
+  /**
+   * Employee check-out
+   */
+  checkOut: async () => {
+    const response = await api.post('/attendance/checkout');
     return response.data;
   },
 };
