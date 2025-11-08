@@ -5,7 +5,6 @@ const AdminSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const links = [
-    { label: 'Dashboard', to: '/admin/dashboard', icon: '📊' },
     { label: 'Employees', to: '/admin/employees', icon: '👥' },
     { label: 'Attendance', to: '/admin/attendance', icon: '📅' },
     { label: 'Time Off', to: '/admin/timeoff', icon: '🏖️' },

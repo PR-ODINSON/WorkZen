@@ -28,7 +28,7 @@ exports.adminOnly = async (req, res, next) => {
   try {
     if (!req.user) return res.status(401).json({ success:false, message:'Unauthorized' });
     const user = await User.findById(req.user.id);
-    if (!user || user.role !== 'admin') return res.status(403).json({ success:false, message:'Forbidden: Admins only' });
+    if (!user || user.role !== 'Admin') return res.status(403).json({ success:false, message:'Forbidden: Admins only' });
     next();
   } catch (err) {
     return res.status(500).json({ success:false, message:'Server error' });

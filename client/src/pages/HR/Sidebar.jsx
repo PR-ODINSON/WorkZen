@@ -5,7 +5,6 @@ const HRSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const links = [
-    { label: 'Dashboard', to: '/hr/dashboard', icon: '📊' },
     { label: 'Employees', to: '/hr/employees', icon: '👥' },
     { label: 'Attendance', to: '/hr/attendance', icon: '📅' },
     { label: 'Time Off', to: '/hr/timeoff', icon: '🏖️' },

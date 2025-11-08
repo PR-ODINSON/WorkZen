@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authService.login(credentials)
+      console.log('Login response:', response)
       const { user, token } = response
       
       // Store token and user data
@@ -36,11 +37,15 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(user))
       setUser(user)
       
+      console.log('User set:', user)
+      console.log('Redirecting to:', user.role)
+      
       // Redirect based on role
       redirectBasedOnRole(user.role)
       
       return { success: true }
     } catch (error) {
+      console.error('Login error:', error)
       return { success: false, error: error.message }
     }
   }
@@ -54,18 +59,18 @@ export const AuthProvider = ({ children }) => {
 
   const redirectBasedOnRole = (role) => {
     const roleRoutes = {
-      'admin': '/admin/dashboard',
-      'Admin': '/admin/dashboard',
-      'hr': '/hr/dashboard',
-      'HR': '/hr/dashboard',
-      'payroll': '/payroll/dashboard',
-      'payrollOfficer': '/payroll/dashboard',
-      'Payroll Officer': '/payroll/dashboard',
-      'employee': '/employee/dashboard',
-      'Employee': '/employee/dashboard',
+      'admin': '/admin/employees',
+      'Admin': '/admin/employees',
+      'hr': '/hr/employees',
+      'HR': '/hr/employees',
+      'payroll': '/payroll/employees',
+      'payrollofficer': '/payroll/employees',
+      'Payroll Officer': '/payroll/employees',
+      'employee': '/employee/attendance',
+      'Employee': '/employee/attendance',
     }
     
-    const route = roleRoutes[role] || '/employee/dashboard'
+    const route = roleRoutes[role] || '/employee/attendance'
     navigate(route)
   }
 
@@ -82,7 +87,6 @@ export const AuthProvider = ({ children }) => {
     hasRole,
     isAuthenticated: !!user,
   }
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 

@@ -25,15 +25,15 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
   const allowed = allowedRoles.map(r => r.toLowerCase())
 
   if (!allowed.includes(userRole)) {
-    // Redirect to user's appropriate dashboard
+    // Redirect to user's appropriate page
     const roleRoutes = {
-      'admin': '/admin/dashboard',
-      'hr': '/hr/dashboard',
-      'payroll': '/payroll/dashboard',
-      'payrollofficer': '/payroll/dashboard',
-      'employee': '/employee/dashboard',
+      'admin': '/admin/employees',
+      'hr': '/hr/employees',
+      'payroll': '/payroll/employees',
+      'payrollofficer': '/payroll/employees',
+      'employee': '/employee/attendance',
     }
-    return <Navigate to={roleRoutes[userRole] || '/employee/dashboard'} replace />
+    return <Navigate to={roleRoutes[userRole] || '/employee/attendance'} replace />
   }
 
   return children

@@ -1,13 +1,12 @@
 import React, { useState } from 'react'
-import api from '../api'
-import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -15,30 +14,13 @@ export default function Login() {
     setLoading(true)
 
     try {
-      const res = await api.post('/auth/login', { email, password })
-      
-      if (res.data && res.data.token) {
-        // Store token and user info
-        localStorage.setItem('token', res.data.token)
-        if (res.data.user) {
-          localStorage.setItem('userName', res.data.user.name)
-          localStorage.setItem('userEmail', res.data.user.email)
-          localStorage.setItem('userRole', res.data.user.role)
-          
-          // Redirect based on role
-          const roleRoutes = {
-            'Admin': '/admin/dashboard',
-            'HR': '/hr/dashboard',
-            'PayrollOfficer': '/payroll/dashboard',
-            'Employee': '/employee/dashboard'
-          }
-          const redirectPath = roleRoutes[res.data.user.role] || '/employee/dashboard'
-          navigate(redirectPath)
-        }
+      const result = await login({ email, password })
+      if (!result.success) {
+        setError(result.error || 'Login failed. Please try again.')
       }
     } catch (err) {
       console.error('Login error:', err)
-      setError(err?.response?.data?.message || 'Login failed. Please try again.')
+      setError('Login failed. Please try again.')
     } finally {
       setLoading(false)
     }

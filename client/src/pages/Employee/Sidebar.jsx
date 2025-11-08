@@ -5,7 +5,6 @@ const EmployeeSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const links = [
-    { label: 'Dashboard', to: '/employee/dashboard', icon: '📊' },
     { label: 'My Attendance', to: '/employee/attendance', icon: '📅' },
     { label: 'Time Off', to: '/employee/timeoff', icon: '🏖️' },
     { label: 'Payslips', to: '/employee/payroll', icon: '💰' },

@@ -41,18 +41,6 @@ export default function App() {
 
       {/* Admin Routes */}
       <Route
-        path="/admin/dashboard"
-        element={
-          <ProtectedRoute>
-            <RoleProtectedRoute allowedRoles={['Admin']}>
-              <DashboardLayout Sidebar={Admin.Sidebar}>
-                <Admin.Dashboard />
-              </DashboardLayout>
-            </RoleProtectedRoute>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/admin/employees"
         element={
           <ProtectedRoute>
@@ -127,18 +115,6 @@ export default function App() {
 
       {/* Employee Routes */}
       <Route
-        path="/employee/dashboard"
-        element={
-          <ProtectedRoute>
-            <RoleProtectedRoute allowedRoles={['Employee']}>
-              <DashboardLayout Sidebar={Employee.Sidebar}>
-                <Employee.Dashboard />
-              </DashboardLayout>
-            </RoleProtectedRoute>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/employee/attendance"
         element={
           <ProtectedRoute>
@@ -201,18 +177,6 @@ export default function App() {
 
       {/* HR Routes */}
       <Route
-        path="/hr/dashboard"
-        element={
-          <ProtectedRoute>
-            <RoleProtectedRoute allowedRoles={['HR']}>
-              <DashboardLayout Sidebar={HR.Sidebar}>
-                <HR.Dashboard />
-              </DashboardLayout>
-            </RoleProtectedRoute>
-          </ProtectedRoute>
-        }
-      />
-      <Route
         path="/hr/employees"
         element={
           <ProtectedRoute>
@@ -274,18 +238,6 @@ export default function App() {
       />
 
       {/* Payroll Officer Routes */}
-      <Route
-        path="/payroll/dashboard"
-        element={
-          <ProtectedRoute>
-            <RoleProtectedRoute allowedRoles={['PayrollOfficer']}>
-              <DashboardLayout Sidebar={PayrollOfficer.Sidebar}>
-                <PayrollOfficer.Dashboard />
-              </DashboardLayout>
-            </RoleProtectedRoute>
-          </ProtectedRoute>
-        }
-      />
       <Route
         path="/payroll/employees"
         element={
@@ -365,7 +317,7 @@ export default function App() {
       <Route path="/timeoff" element={<Navigate to="/admin/timeoff" replace />} />
       <Route path="/payroll" element={<Navigate to="/admin/payroll" replace />} />
       <Route path="/reports" element={<Navigate to="/admin/reports" replace />} />
-      <Route path="/settings" element={<Navigate to="/admin/dashboard" replace />} />
+      <Route path="/settings" element={<Navigate to="/admin/employees" replace />} />
       <Route path="/profile" element={<Navigate to="/admin/profile" replace />} />
 
       {/* Catch all - redirect to login */}
