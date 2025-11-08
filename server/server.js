@@ -20,6 +20,9 @@ emailService.initialize();
 // Auth routes
 app.use('/api/auth', require('./routes/authRoutes'));
 
+// Employee routes (for logged-in employees)
+app.use('/api/attendance', require('./routes/attendance'));
+
 // Admin routes
 app.use('/api/admin/employees', require('./routes/admin/employees'));
 app.use('/api/admin/users', require('./routes/admin/users'));

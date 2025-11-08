@@ -1,14 +1,46 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import attendanceService from '../../services/attendanceService'
 
 const Navbar = () => {
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [attendanceStatus, setAttendanceStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
   const dropdownRef = useRef(null)
 
   // Get user info from localStorage (if stored during login)
   const userEmail = localStorage.getItem('userEmail') || 'Admin'
   const userName = localStorage.getItem('userName') || 'Admin User'
+  
+  // Get user role from stored user object
+  let userRole = 'Employee'
+  try {
+    const userStr = localStorage.getItem('user')
+    if (userStr) {
+      const user = JSON.parse(userStr)
+      userRole = user.role || 'Employee'
+    }
+  } catch (error) {
+    console.error('Error parsing user data:', error)
+  }
+
+  // Fetch today's attendance status
+  useEffect(() => {
+    if (userRole === 'Employee') {
+      fetchTodayStatus()
+    }
+  }, [userRole])
+
+  const fetchTodayStatus = async () => {
+    try {
+      const response = await attendanceService.getTodayStatus()
+      setAttendanceStatus(response.data?.attendance || null)
+    } catch (error) {
+      console.error('Error fetching attendance status:', error)
+      setAttendanceStatus(null)
+    }
+  }
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -22,16 +54,53 @@ const Navbar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const handleCheckIn = async () => {
+    setLoading(true)
+    try {
+      const response = await attendanceService.checkIn()
+      setAttendanceStatus(response.data?.attendance || null)
+      alert('✅ Checked in successfully!')
+      await fetchTodayStatus()
+    } catch (error) {
+      console.error('Check-in error:', error)
+      alert(error.response?.data?.message || 'Failed to check in. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCheckOut = async () => {
+    setLoading(true)
+    try {
+      const response = await attendanceService.checkOut()
+      setAttendanceStatus(response.data?.attendance || null)
+      alert('✅ Checked out successfully!')
+      await fetchTodayStatus()
+    } catch (error) {
+      console.error('Check-out error:', error)
+      alert(error.response?.data?.message || 'Failed to check out. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('userName')
     localStorage.removeItem('userEmail')
+    localStorage.removeItem('user')
     navigate('/login')
   }
 
   const handleProfileClick = () => {
     setIsDropdownOpen(false)
     navigate('/profile')
+  }
+
+  const formatTime = (dateString) => {
+    if (!dateString) return '--:--'
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
   }
 
   return (
@@ -43,8 +112,60 @@ const Navbar = () => {
         </h2>
       </div>
 
-      {/* Right side - Profile Dropdown */}
+      {/* Right side - Attendance & Profile */}
       <div className="flex items-center gap-4">
+        {/* Check-in/Check-out Buttons (Only for Employees) */}
+        {userRole === 'Employee' && (
+          <div className="flex items-center gap-3 border-r border-slate-200 pr-4">
+            {/* Check-in Button */}
+            <button
+              onClick={handleCheckIn}
+              disabled={loading || (attendanceStatus && attendanceStatus.checkIn)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                attendanceStatus && attendanceStatus.checkIn
+                  ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                  : 'bg-green-600 text-white hover:bg-green-700 active:scale-95'
+              } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>
+                {attendanceStatus && attendanceStatus.checkIn
+                  ? `In: ${formatTime(attendanceStatus.checkIn)}`
+                  : 'Check In'}
+              </span>
+            </button>
+
+            {/* Check-out Button */}
+            <button
+              onClick={handleCheckOut}
+              disabled={
+                loading ||
+                !attendanceStatus ||
+                !attendanceStatus.checkIn ||
+                attendanceStatus.checkOut
+              }
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+                attendanceStatus && attendanceStatus.checkOut
+                  ? 'bg-red-100 text-red-700 cursor-not-allowed'
+                  : !attendanceStatus || !attendanceStatus.checkIn
+                  ? 'bg-slate-200 text-slate-500 cursor-not-allowed'
+                  : 'bg-red-600 text-white hover:bg-red-700 active:scale-95'
+              } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span>
+                {attendanceStatus && attendanceStatus.checkOut
+                  ? `Out: ${formatTime(attendanceStatus.checkOut)}`
+                  : 'Check Out'}
+              </span>
+            </button>
+          </div>
+        )}
+
         {/* Profile Button */}
         <div className="relative" ref={dropdownRef}>
           <button
