@@ -7,6 +7,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 import RoleProtectedRoute from './components/layout/RoleProtectedRoute'
 import Navbar from './components/layout/Navbar'
 import Sidebar from './components/layout/Sidebar'
+import { SidebarProvider, useSidebar } from './context/SidebarContext'
 
 // Admin imports
 import * as Admin from './pages/Admin'
@@ -20,21 +21,38 @@ import * as HR from './pages/HR'
 // Payroll Officer imports
 import * as PayrollOfficer from './pages/PayrollOfficer'
 
-// Layout component for authenticated pages
-const DashboardLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => (
-  <div className="min-h-screen flex bg-gradient-to-br from-emerald-50 via-white to-teal-50 relative overflow-hidden">
-    {/* Animated Background Elements */}
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-      <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-    </div>
+// Wrapper component that provides SidebarProvider
+const SidebarLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => (
+  <SidebarProvider>
+    <DashboardLayout Sidebar={SidebarComponent}>
+      {children}
+    </DashboardLayout>
+  </SidebarProvider>
+)
 
-    {/* Sidebar - Dynamic based on role */}
-    <SidebarComponent />
-    
-    {/* Main content area */}
-    <div className="flex-1 ml-60 relative z-10">
+// Layout component for authenticated pages
+const DashboardLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => {
+  const { isCollapsed } = useSidebar()
+  
+  // Calculate margin based on sidebar state
+  // Admin sidebar: expanded = 16rem (256px), collapsed = 5rem (80px)
+  // Default sidebar: expanded = 20rem (320px), collapsed = 5rem (80px)
+  const marginLeft = isCollapsed ? 'ml-20' : 'ml-64' // 5rem when collapsed, 16rem when expanded
+  
+  return (
+    <div className="min-h-screen flex bg-gradient-to-br from-emerald-50 via-white to-teal-50 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+      {/* Sidebar - Dynamic based on role */}
+      <SidebarComponent />
+      
+      {/* Main content area - Responsive margin */}
+      <div className={`flex-1 ${marginLeft} transition-all duration-300 relative z-10`}>
       {/* Navbar - Fixed top */}
       <Navbar />
       
@@ -65,9 +83,10 @@ const DashboardLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => (
       .animation-delay-4000 {
         animation-delay: 4s;
       }
-    `}</style>
-  </div>
-)
+      `}</style>
+    </div>
+  )
+}
 
 export default function App() {
   return (
@@ -81,13 +100,25 @@ export default function App() {
 
       {/* Admin Routes */}
       <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute>
+            <RoleProtectedRoute allowedRoles={['Admin']}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
+                <Admin.Dashboard />
+              </SidebarLayout>
+            </RoleProtectedRoute>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/admin/employees"
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>
-              <DashboardLayout Sidebar={Admin.Sidebar}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
                 <Admin.Employees />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -97,9 +128,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>
-              <DashboardLayout Sidebar={Admin.Sidebar}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
                 <Admin.Attendance />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -109,9 +140,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>
-              <DashboardLayout Sidebar={Admin.Sidebar}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
                 <Admin.TimeOff />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -121,9 +152,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>
-              <DashboardLayout Sidebar={Admin.Sidebar}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
                 <Admin.Payroll />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -133,9 +164,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>
-              <DashboardLayout Sidebar={Admin.Sidebar}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
                 <Admin.Reports />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }
@@ -145,9 +176,9 @@ export default function App() {
         element={
           <ProtectedRoute>
             <RoleProtectedRoute allowedRoles={['Admin']}>
-              <DashboardLayout Sidebar={Admin.Sidebar}>
+              <SidebarLayout Sidebar={Admin.Sidebar}>
                 <Admin.MyProfile />
-              </DashboardLayout>
+              </SidebarLayout>
             </RoleProtectedRoute>
           </ProtectedRoute>
         }

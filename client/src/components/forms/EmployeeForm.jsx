@@ -1,6 +1,18 @@
-﻿import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
+import {
+  FaUser,
+  FaEnvelope,
+  FaPhoneAlt,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaBriefcase,
+  FaBuilding,
+  FaHeartbeat,
+  FaUserShield,
+  FaRupeeSign
+} from 'react-icons/fa'
 
-const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
+export default function EmployeeForm({ employee, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -11,9 +23,8 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
     salary: '',
     joiningDate: '',
     manager: '',
-    location: '',
+    location: ''
   })
-
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
@@ -28,7 +39,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
         salary: employee.salary || '',
         joiningDate: employee.joiningDate ? employee.joiningDate.split('T')[0] : '',
         manager: employee.manager || '',
-        location: employee.location || '',
+        location: employee.location || ''
       })
     }
   }, [employee])
@@ -49,7 +60,6 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
 
   const validate = () => {
     const newErrors = {}
-    
     if (!formData.name.trim()) newErrors.name = 'Name is required'
     if (!formData.email.trim()) newErrors.email = 'Email is required'
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid'
@@ -67,9 +77,7 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (validate()) {
-      onSubmit(formData)
-    }
+    if (validate()) onSubmit(formData)
   }
 
   return (
@@ -238,13 +246,13 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+          className="px-6 py-2 rounded-lg border border-slate-300 hover:bg-slate-50 transition-all"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          className="px-6 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg hover:scale-[1.02] transition-all"
         >
           {employee ? 'Update Employee' : 'Add Employee'}
         </button>
@@ -252,5 +260,3 @@ const EmployeeForm = ({ employee, onSubmit, onCancel }) => {
     </form>
   )
 }
-
-export default EmployeeForm
