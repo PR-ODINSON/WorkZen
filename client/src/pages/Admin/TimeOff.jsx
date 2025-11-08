@@ -39,15 +39,20 @@ export default function TimeOff() {
       
       const response = await leaveService.getAll(params)
       
-      console.log('Leave API response:', response)
+      console.log('Leave API full response:', response)
+      console.log('Response data:', response.data)
+      console.log('Response leaves:', response.leaves)
       
-      if (response && response.leaves) {
-        console.log('Leave records:', response.leaves)
+      // Handle both response.data.leaves and response.leaves patterns
+      const leavesArray = response.data?.leaves || response.leaves || []
+      
+      if (leavesArray && leavesArray.length > 0) {
+        console.log('Leave records found:', leavesArray)
         
-        const formattedData = response.leaves.map((record) => {
+        const formattedData = leavesArray.map((record) => {
           const startDate = new Date(record.startDate)
           const endDate = new Date(record.endDate)
-          const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
+          const days = record.numberOfDays || Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1
           
           return {
             id: record._id,
@@ -66,7 +71,8 @@ export default function TimeOff() {
             }),
             days,
             status: record.status || 'pending',
-            reason: record.reason || ''
+            reason: record.reason || '',
+            rawData: record
           }
         })
         
@@ -78,6 +84,7 @@ export default function TimeOff() {
       }
     } catch (error) {
       console.error('Error fetching leave data:', error)
+      console.error('Error response:', error.response?.data)
       setLeaveData([])
     } finally {
       setLoading(false)
@@ -105,6 +112,21 @@ export default function TimeOff() {
       alert(error.response?.data?.message || 'Failed to reject leave request')
     }
   }
+
+  const getCurrentDateInfo = () => {
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+    
+    const now = new Date()
+    const dayName = days[now.getDay()]
+    const date = now.getDate()
+    const month = months[now.getMonth()]
+    const year = now.getFullYear()
+    
+    return { dayName, date, month, year }
+  }
+
+  const dateInfo = getCurrentDateInfo()
 
   const columns = [
     { header: 'Employee Name', accessor: 'employee' },
@@ -178,34 +200,39 @@ export default function TimeOff() {
   ]
 
   return (
-    <div className="min-h-screen rounded-3xl space-y-8">
+    <div className="min-h-screen space-y-6">
       {/* Header Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6">
-        <div className="relative z-10 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
-              <FaUmbrellaBeach className="text-white text-3xl" />
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-xl p-8">
+        <div className="relative z-10 flex items-center gap-4">
+          <div className="bg-white/20 p-4 rounded-xl backdrop-blur-sm">
+            <FaUmbrellaBeach className="text-white text-3xl" />
+          </div>
+          <div>
+            <div className="flex items-center gap-4 mb-1">
+              <h1 className="text-4xl font-bold">Time Off</h1>
+              <div className="text-sm bg-white/20 px-4 py-1.5 rounded-lg backdrop-blur-sm">
+                <span className="font-semibold">{dateInfo.date} {dateInfo.month} {dateInfo.year}</span>
+                <span className="mx-2">•</span>
+                <span>{dateInfo.dayName}</span>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold mb-1">Time Off</h1>
-              <p className="text-blue-100">Manage and review employee leave requests</p>
-            </div>
+            <p className="text-blue-100 text-base">Manage and review employee leave requests</p>
           </div>
         </div>
       </section>
 
       {/* Filters Section */}
-      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-4">
+      <section className="bg-white rounded-xl shadow-md border border-gray-200 p-5">
         <div className="flex items-center gap-4 flex-wrap">
           <div className="flex items-center gap-2">
             <FaFilter className="text-gray-500" />
-            <label className="text-sm font-medium text-gray-700">Filters:</label>
+            <label className="text-sm font-semibold text-gray-700">Filters:</label>
           </div>
           
           <select
             value={filters.leaveType}
             onChange={(e) => setFilters({ ...filters, leaveType: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           >
             <option value="">All Time Off Types</option>
             <option value="Paid time Off">Paid time Off</option>
@@ -216,7 +243,7 @@ export default function TimeOff() {
           <select
             value={filters.status}
             onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
           >
             <option value="">All Status</option>
             <option value="pending">Pending</option>
@@ -236,17 +263,24 @@ export default function TimeOff() {
       </section>
 
       {/* Table Section */}
-      <section className="bg-white/90 backdrop-blur-sm border border-blue-100 rounded-2xl shadow-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-          <FaUmbrellaBeach className="text-blue-500" /> Leave Requests Overview
-        </h2>
-        {loading ? (
-          <div className="text-center py-8 text-gray-500">Loading leave requests...</div>
-        ) : leaveData.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">No leave requests found</div>
-        ) : (
-          <Table columns={columns} data={leaveData} />
-        )}
+      <section className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden">
+        <div className="p-6 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <FaUmbrellaBeach className="text-blue-500" /> Leave Requests Overview
+          </h2>
+        </div>
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="text-center py-12 text-gray-500">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+              <p className="mt-2">Loading leave requests...</p>
+            </div>
+          ) : leaveData.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">No leave requests found</div>
+          ) : (
+            <Table columns={columns} data={leaveData} />
+          )}
+        </div>
       </section>
     </div>
   )
