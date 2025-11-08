@@ -94,7 +94,6 @@ class AuthService {
   async login(credentials) {
     const { email, password } = credentials;
 
-<<<<<<< HEAD
     console.log('Login attempt with:', email);
 
     // Find user by email or loginId
@@ -104,17 +103,6 @@ class AuthService {
     
     console.log('User found:', user ? `Yes - ${user.email} (LoginID: ${user.loginId})` : 'No');
     
-=======
-    // Validate input
-    if (!email || !password) {
-      throw new Error('Email and password are required');
-    }
-
-    console.log('Login attempt for email:', email);
-
-    // Find user
-    const user = await User.findOne({ email });
->>>>>>> f0c31e9 (nj)
     if (!user) {
       console.log('User not found:', email);
       throw new Error('Invalid credentials');

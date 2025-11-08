@@ -16,7 +16,6 @@ const Sidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const links = [
-    { label: 'Dashboard', to: '/dashboard', icon: <FaHome /> },
     { label: 'Employees', to: '/employees', icon: <FaUsers /> },
     { label: 'Attendance', to: '/attendance', icon: <FaCalendarAlt /> },
     { label: 'Time Off', to: '/timeoff', icon: <FaUmbrellaBeach /> },
