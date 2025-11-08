@@ -145,7 +145,7 @@ class AttendanceService {
   /**
    * Employee check-in
    */
-  async checkIn(empId) {
+  async checkIn(empId, userId) {
     // Check if employee exists
     const employee = await Employee.findById(empId);
     if (!employee) {
@@ -168,6 +168,7 @@ class AttendanceService {
 
     // Create new attendance record
     const attendance = await Attendance.create({
+      userId,
       empId,
       date: new Date(),
       checkIn: new Date(),

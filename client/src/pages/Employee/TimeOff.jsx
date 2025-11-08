@@ -125,8 +125,8 @@ export default function EmployeeTimeOff() {
       errors.attachment = 'Medical certificate is required for sick leave'
     }
 
-    // Validate against balance
-    if (leaveBalance && formData.leaveType && formData.numberOfDays) {
+    // Validate against balance (not for Unpaid leave)
+    if (leaveBalance && formData.leaveType && formData.numberOfDays && formData.leaveType !== 'Unpaid') {
       const type = formData.leaveType === 'Paid time Off' ? 'paidTimeOff' : 'sickTimeOff'
       if (formData.numberOfDays > leaveBalance[type].available) {
         errors.numberOfDays = `Insufficient balance. Available: ${leaveBalance[type].available} days`
@@ -241,7 +241,7 @@ export default function EmployeeTimeOff() {
 
       {/* Leave Balance Cards */}
       {leaveBalance && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Paid Time Off */}
           <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
             <h3 className="text-lg font-semibold text-blue-600 mb-4">Paid time Off</h3>
@@ -265,6 +265,17 @@ export default function EmployeeTimeOff() {
               <span>Total: {leaveBalance.sickTimeOff.total} days</span>
               <span className="mx-2">•</span>
               <span>Used: {leaveBalance.sickTimeOff.used} days</span>
+            </div>
+          </div>
+
+          {/* Unpaid Leave */}
+          <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-600 mb-4">Unpaid</h3>
+            <div className="text-3xl font-bold text-slate-800 mb-2">
+              {leaveBalance.unpaid?.used || 0} Days Used
+            </div>
+            <div className="text-sm text-slate-600">
+              <span>No limit on unpaid leave</span>
             </div>
           </div>
         </div>
@@ -307,7 +318,11 @@ export default function EmployeeTimeOff() {
                     <td className="px-6 py-4 text-sm text-slate-700">{formatDate(request.startDate)}</td>
                     <td className="px-6 py-4 text-sm text-slate-700">{formatDate(request.endDate)}</td>
                     <td className="px-6 py-4 text-sm">
-                      <span className={`${request.leaveType === 'Paid time Off' ? 'text-blue-600' : 'text-red-600'} font-medium`}>
+                      <span className={`${
+                        request.leaveType === 'Paid time Off' ? 'text-blue-600' : 
+                        request.leaveType === 'Sick time off' ? 'text-red-600' : 
+                        'text-gray-600'
+                      } font-medium`}>
                         {request.leaveType}
                       </span>
                     </td>
@@ -368,6 +383,7 @@ export default function EmployeeTimeOff() {
                 >
                   <option value="Paid time Off">Paid time Off</option>
                   <option value="Sick time off">Sick time off</option>
+                  <option value="Unpaid">Unpaid</option>
                 </select>
                 {formErrors.leaveType && (
                   <p className="mt-1 text-sm text-red-500">{formErrors.leaveType}</p>

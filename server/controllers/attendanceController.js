@@ -39,10 +39,11 @@ exports.getTodayStatus = async (req, res) => {
 exports.checkIn = async (req, res) => {
   try {
     const empId = req.user.empId; // Get employee ID from verified token
-    const userId = req.user.id; // Get user ID as fallback
+    const userId = req.user.id; // Get user ID from verified token
     
     console.log('Check-in request from user:', req.user);
-    console.log('Employee ID:', empId, 'User ID:', userId);
+    console.log('Employee ID:', empId);
+    console.log('User ID:', userId);
     
     let attendance;
     
