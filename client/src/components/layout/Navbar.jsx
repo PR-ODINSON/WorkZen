@@ -6,6 +6,7 @@ const Navbar = () => {
   const navigate = useNavigate()
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [attendanceStatus, setAttendanceStatus] = useState(null)
+  const [userAttendanceStatus, setUserAttendanceStatus] = useState(null)
   const [loading, setLoading] = useState(false)
   const dropdownRef = useRef(null)
 
@@ -30,6 +31,9 @@ const Navbar = () => {
   useEffect(() => {
     if (userRole === 'Employee') {
       fetchTodayStatus()
+    } else {
+      // For Admin, HR, PayrollOfficer
+      fetchUserAttendanceStatus()
     }
   }, [userRole])
 
@@ -40,6 +44,16 @@ const Navbar = () => {
     } catch (error) {
       console.error('Error fetching attendance status:', error)
       setAttendanceStatus(null)
+    }
+  }
+
+  const fetchUserAttendanceStatus = async () => {
+    try {
+      const response = await attendanceService.getTodayUserStatus()
+      setUserAttendanceStatus(response.data?.attendance || null)
+    } catch (error) {
+      console.error('Error fetching user attendance status:', error)
+      setUserAttendanceStatus(null)
     }
   }
 
@@ -111,12 +125,9 @@ const Navbar = () => {
   }
 
   return (
-    <header className="h-16 bg-white shadow-md fixed top-0 right-0 left-60 z-30 flex items-center justify-between px-6">
+    <header className=" bg-[#fff0]  fixed top-0 right-0 left-0 z-30 flex items-center  w-full justify-between px-6">
       {/* Left side - Title */}
       <div className="flex items-center">
-        <h2 className="text-2xl font-bold text-slate-800">
-          WorkZen <span className="text-indigo-600">HRMS</span>
-        </h2>
       </div>
 
       {/* Right side - Attendance & Profile */}
@@ -192,9 +203,17 @@ const Navbar = () => {
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center gap-3 hover:bg-slate-100 rounded-lg px-3 py-2 transition-colors"
           >
-            {/* Avatar Circle */}
-            <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
-              {userName.charAt(0).toUpperCase()}
+            {/* Avatar Circle with Attendance Indicator */}
+            <div className="relative">
+              <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-semibold">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              {/* Attendance Status Indicator - for Admin, HR, PayrollOfficer */}
+              {userRole !== 'Employee' && (
+                <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${
+                  userAttendanceStatus && userAttendanceStatus.checkIn ? 'bg-green-500' : 'bg-red-500'
+                }`} title={userAttendanceStatus && userAttendanceStatus.checkIn ? 'Attendance marked' : 'Attendance not marked'}></div>
+              )}
             </div>
             <div className="text-left hidden md:block">
               <p className="text-sm font-medium text-slate-800">{userName}</p>

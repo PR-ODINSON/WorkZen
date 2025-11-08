@@ -76,6 +76,22 @@ export const attendanceService = {
     const response = await api.post('/attendance/checkout');
     return response.data;
   },
+
+  /**
+   * Mark attendance for logged-in user (Admin, HR, PayrollOfficer)
+   */
+  markUserAttendance: async () => {
+    const response = await api.post('/admin/attendance/mark');
+    return response.data;
+  },
+
+  /**
+   * Get today's attendance status for logged-in user
+   */
+  getTodayUserStatus: async () => {
+    const response = await api.get('/admin/attendance/today');
+    return response.data;
+  },
 };
 
 export default attendanceService;
