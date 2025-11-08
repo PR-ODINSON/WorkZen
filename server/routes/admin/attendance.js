@@ -4,7 +4,17 @@ const attendanceCtrl = require('../../controllers/admin/attendanceController');
 const { verifyToken, adminOnly } = require('../../middlewares/authMiddleware');
 
 // Apply auth middleware to all routes
-router.use(verifyToken, adminOnly);
+router.use(verifyToken);
+
+// User-specific attendance routes (any authenticated user)
+// POST /api/admin/attendance/mark - Mark attendance for logged-in user
+router.post('/mark', attendanceCtrl.markUserAttendance);
+
+// GET /api/admin/attendance/today - Get today's attendance status for logged-in user
+router.get('/today', attendanceCtrl.getTodayUserStatus);
+
+// Admin-only routes
+router.use(adminOnly);
 
 // GET /api/admin/attendance - Get all attendance records
 router.get('/', attendanceCtrl.list);

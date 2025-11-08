@@ -41,13 +41,6 @@ const DashboardLayout = ({ children, Sidebar: SidebarComponent = Sidebar }) => {
   
   return (
     <div className="min-h-screen flex bg-gradient-to-br from-emerald-50 via-white to-teal-50 relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-300 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-      </div>
-
       {/* Sidebar - Dynamic based on role */}
       <SidebarComponent />
       

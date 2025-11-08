@@ -22,6 +22,7 @@ class AttendanceService {
     const skip = (page - 1) * limit;
     const attendance = await Attendance.find(filter)
       .populate('empId', 'name email employeeId')
+      .populate('userId', 'name email role')
       .limit(parseInt(limit))
       .skip(skip)
       .sort({ date: -1 });
@@ -166,6 +167,85 @@ class AttendanceService {
    */
   async checkOut(empId) {
     const attendance = await this.getTodayAttendance(empId);
+    
+    if (!attendance) {
+      throw new Error('No check-in record found for today');
+    }
+
+    if (!attendance.checkIn) {
+      throw new Error('You must check in before checking out');
+    }
+
+    if (attendance.checkOut) {
+      throw new Error('You have already checked out today');
+    }
+
+    attendance.checkOut = new Date();
+    await attendance.save();
+
+    return attendance;
+  }
+
+  /**
+   * Get today's attendance for a user (Admin, HR, PayrollOfficer, etc.)
+   */
+  async getTodayUserAttendance(userId) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const attendance = await Attendance.findOne({
+      userId,
+      date: { $gte: today, $lt: tomorrow }
+    }).populate('userId', 'name email role');
+
+    return attendance;
+  }
+
+  /**
+   * User check-in (for Admin, HR, PayrollOfficer, Employee)
+   */
+  async userCheckIn(userId) {
+    const User = require('../models/User');
+    
+    // Check if user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Check if already checked in today
+    const existingAttendance = await this.getTodayUserAttendance(userId);
+    
+    if (existingAttendance) {
+      if (existingAttendance.checkIn) {
+        throw new Error('You have already checked in today');
+      }
+      // Update existing record with check-in
+      existingAttendance.checkIn = new Date();
+      existingAttendance.status = 'present';
+      await existingAttendance.save();
+      return existingAttendance;
+    }
+
+    // Create new attendance record
+    const attendance = await Attendance.create({
+      userId,
+      date: new Date(),
+      checkIn: new Date(),
+      status: 'present'
+    });
+
+    return await this.getTodayUserAttendance(userId);
+  }
+
+  /**
+   * User check-out (for Admin, HR, PayrollOfficer, Employee)
+   */
+  async userCheckOut(userId) {
+    const attendance = await this.getTodayUserAttendance(userId);
     
     if (!attendance) {
       throw new Error('No check-in record found for today');

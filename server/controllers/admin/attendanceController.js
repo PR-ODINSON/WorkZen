@@ -55,3 +55,31 @@ exports.remove = async (req, res) => {
     return error(res, err.message, 404);
   }
 };
+
+/**
+ * Mark attendance for logged-in user (Admin, HR, PayrollOfficer)
+ */
+exports.markUserAttendance = async (req, res) => {
+  try {
+    const userId = req.user.id; // From JWT token
+    const attendance = await attendanceService.userCheckIn(userId);
+    return success(res, { attendance }, 200);
+  } catch (err) {
+    console.error('Mark user attendance error:', err);
+    return error(res, err.message, 400);
+  }
+};
+
+/**
+ * Get today's attendance status for logged-in user
+ */
+exports.getTodayUserStatus = async (req, res) => {
+  try {
+    const userId = req.user.id; // From JWT token
+    const attendance = await attendanceService.getTodayUserAttendance(userId);
+    return success(res, { attendance });
+  } catch (err) {
+    console.error('Get today user status error:', err);
+    return error(res, err.message);
+  }
+};
