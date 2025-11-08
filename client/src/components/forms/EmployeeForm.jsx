@@ -259,8 +259,4 @@ export default function EmployeeForm({ employee, onSubmit, onCancel }) {
       </div>
     </form>
   )
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 61031b6a91e986a1fb48e26b510bd3edebfd1d84
