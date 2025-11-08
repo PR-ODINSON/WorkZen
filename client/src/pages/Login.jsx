@@ -23,10 +23,18 @@ export default function Login() {
         if (res.data.user) {
           localStorage.setItem('userName', res.data.user.name)
           localStorage.setItem('userEmail', res.data.user.email)
+          localStorage.setItem('userRole', res.data.user.role)
+          
+          // Redirect based on role
+          const roleRoutes = {
+            'Admin': '/admin/dashboard',
+            'HR': '/hr/dashboard',
+            'PayrollOfficer': '/payroll/dashboard',
+            'Employee': '/employee/dashboard'
+          }
+          const redirectPath = roleRoutes[res.data.user.role] || '/employee/dashboard'
+          navigate(redirectPath)
         }
-        
-        // Redirect to employees
-        navigate('/employees')
       }
     } catch (err) {
       console.error('Login error:', err)
