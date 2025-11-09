@@ -636,7 +636,7 @@ class PayrollService {
         department: employee.department || 'N/A',
         designation: employee.designation || 'N/A',
         location: employee.location || 'N/A',
-        dateOfJoining: employee.joiningDate ? new Date(employee.joiningDate).toLocaleDateString('en-GB') : 'N/A',
+        dateOfJoining: employee.joiningDate ? new Date(employee.joiningDate).toISOString() : 'N/A',
         pan: bankDetails?.panNumber || employee.pan || 'XXXxxxxxx3',
         uan: bankDetails?.uanNumber || employee.uan || '234234234243',
         bankAccount: bankDetails?.accountNumber || employee.bankAccountNumber || '234234234532'
