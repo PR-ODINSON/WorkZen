@@ -10,23 +10,14 @@ router.use(verifyToken, adminOnly);
 // GET /api/admin/payroll/dashboard - Get payroll dashboard data
 router.get('/dashboard', payrollCtrl.getDashboard);
 
-// Payroll Routes
-// GET /api/admin/payroll - Get all payroll records
-router.get('/', payrollCtrl.list);
+// Salary Statement Routes (must be before /:id route)
+// GET /api/admin/payroll/salary-statement - Get salary statement report
+router.get('/salary-statement', payrollCtrl.getSalaryStatement);
 
-// POST /api/admin/payroll - Create new payroll record
-router.post('/', payrollCtrl.create);
+// GET /api/admin/payroll/detailed-salary-statement - Get detailed salary statement for print
+router.get('/detailed-salary-statement', payrollCtrl.getDetailedSalaryStatement);
 
-// GET /api/admin/payroll/:id - Get payroll record by ID
-router.get('/:id', payrollCtrl.get);
-
-// PUT /api/admin/payroll/:id - Update payroll record
-router.put('/:id', payrollCtrl.update);
-
-// DELETE /api/admin/payroll/:id - Delete payroll record
-router.delete('/:id', payrollCtrl.remove);
-
-// Payrun Routes
+// Payrun Routes (must be before /:id route)
 // GET /api/admin/payroll/payruns - Get all payruns
 router.get('/payruns/list', payrollCtrl.listPayruns);
 
@@ -47,5 +38,21 @@ router.get('/payslip/:employeeId', payrollCtrl.getEmployeePayslipDetail);
 
 // GET /api/admin/payroll/payslip/:employeeId/pdf - Generate PDF payslip for employee
 router.get('/payslip/:employeeId/pdf', payrollCtrl.generatePayslipPDF);
+
+// Payroll CRUD Routes (/:id route must come AFTER all specific routes)
+// GET /api/admin/payroll - Get all payroll records
+router.get('/', payrollCtrl.list);
+
+// POST /api/admin/payroll - Create new payroll record
+router.post('/', payrollCtrl.create);
+
+// GET /api/admin/payroll/:id - Get payroll record by ID
+router.get('/:id', payrollCtrl.get);
+
+// PUT /api/admin/payroll/:id - Update payroll record
+router.put('/:id', payrollCtrl.update);
+
+// DELETE /api/admin/payroll/:id - Delete payroll record
+router.delete('/:id', payrollCtrl.remove);
 
 module.exports = router;

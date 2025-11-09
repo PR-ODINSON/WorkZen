@@ -868,6 +868,176 @@ class PayrollService {
       monthlySalary
     };
   }
+
+  /**
+   * Get salary statement report for an employee
+   */
+  async getSalaryStatement(employeeId, year) {
+    const targetYear = year ? parseInt(year) : new Date().getFullYear();
+
+    // Get employee details
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      throw new Error('Employee not found');
+    }
+
+    // Get all payroll records for the employee in the specified year
+    const payrolls = await Payroll.find({
+      empId: employeeId,
+      year: targetYear
+    }).sort({ month: 1 });
+
+    // Get month names
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    // Build salary statement data
+    const salaryData = [];
+    let totalGross = 0;
+    let totalDeductions = 0;
+    let totalNet = 0;
+
+    for (let month = 1; month <= 12; month++) {
+      const payroll = payrolls.find(p => p.month === month);
+      
+      if (payroll) {
+        const gross = payroll.grossAmount || payroll.gross || 0;
+        const deduction = payroll.totalDeductions || payroll.deductions || 0;
+        const net = payroll.netAmount || payroll.netPay || gross - deduction;
+
+        salaryData.push({
+          month: monthNames[month - 1],
+          monthNumber: month,
+          gross,
+          deductions: deduction,
+          net,
+          hasData: true
+        });
+
+        totalGross += gross;
+        totalDeductions += deduction;
+        totalNet += net;
+      } else {
+        salaryData.push({
+          month: monthNames[month - 1],
+          monthNumber: month,
+          gross: 0,
+          deductions: 0,
+          net: 0,
+          hasData: false
+        });
+      }
+    }
+
+    return {
+      employee: {
+        id: employee._id,
+        name: employee.name,
+        employeeId: employee.employeeId,
+        designation: employee.designation,
+        department: employee.department
+      },
+      year: targetYear,
+      salaryData,
+      totals: {
+        gross: totalGross,
+        deductions: totalDeductions,
+        net: totalNet
+      }
+    };
+  }
+
+  /**
+   * Get detailed salary statement for print format
+   */
+  async getDetailedSalaryStatement(employeeId, year) {
+    const targetYear = year ? parseInt(year) : new Date().getFullYear();
+
+    // Get employee details
+    const employee = await Employee.findById(employeeId);
+    if (!employee) {
+      throw new Error('Employee not found');
+    }
+
+    // Get all payroll records for the employee in the specified year
+    const payrolls = await Payroll.find({
+      empId: employeeId,
+      year: targetYear
+    }).sort({ month: 1 });
+
+    // If no payroll data exists, return empty structure
+    if (payrolls.length === 0) {
+      return {
+        employee: {
+          name: employee.name,
+          employeeId: employee.employeeId,
+          designation: employee.designation,
+          dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString('en-IN') : 'N/A',
+          salaryEffectiveFrom: employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString('en-IN') : 'N/A'
+        },
+        earnings: [],
+        deductions: [],
+        monthlyNet: 0,
+        yearlyNet: 0
+      };
+    }
+
+    // Get the most recent payroll to extract earnings and deductions structure
+    const latestPayroll = payrolls[payrolls.length - 1];
+
+    // Build earnings with monthly and yearly amounts
+    const earnings = [];
+    if (latestPayroll.earnings && latestPayroll.earnings.length > 0) {
+      latestPayroll.earnings.forEach(earning => {
+        const monthlyAmount = earning.amount || 0;
+        const yearlyAmount = payrolls.reduce((sum, p) => {
+          const earningInMonth = p.earnings?.find(e => e.ruleName === earning.ruleName);
+          return sum + (earningInMonth?.amount || 0);
+        }, 0);
+
+        earnings.push({
+          component: earning.ruleName,
+          monthlyAmount,
+          yearlyAmount
+        });
+      });
+    }
+
+    // Build deductions with monthly and yearly amounts
+    const deductions = [];
+    if (latestPayroll.deductionsList && latestPayroll.deductionsList.length > 0) {
+      latestPayroll.deductionsList.forEach(deduction => {
+        const monthlyAmount = deduction.amount || 0;
+        const yearlyAmount = payrolls.reduce((sum, p) => {
+          const deductionInMonth = p.deductionsList?.find(d => d.ruleName === deduction.ruleName);
+          return sum + (deductionInMonth?.amount || 0);
+        }, 0);
+
+        deductions.push({
+          component: deduction.ruleName,
+          monthlyAmount,
+          yearlyAmount
+        });
+      });
+    }
+
+    // Calculate totals
+    const monthlyNet = (latestPayroll.netAmount || latestPayroll.netPay || 0);
+    const yearlyNet = payrolls.reduce((sum, p) => sum + (p.netAmount || p.netPay || 0), 0);
+
+    return {
+      employee: {
+        name: employee.name,
+        employeeId: employee.employeeId,
+        designation: employee.designation,
+        dateOfJoining: employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString('en-IN') : 'N/A',
+        salaryEffectiveFrom: employee.dateOfJoining ? new Date(employee.dateOfJoining).toLocaleDateString('en-IN') : 'N/A'
+      },
+      earnings,
+      deductions,
+      monthlyNet,
+      yearlyNet
+    };
+  }
 }
 
 module.exports = new PayrollService();

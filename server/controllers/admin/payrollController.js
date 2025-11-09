@@ -110,6 +110,30 @@ exports.updatePayrunStatus = async (req, res) => {
   }
 };
 
+// Salary Statement Report
+exports.getSalaryStatement = async (req, res) => {
+  try {
+    const { employeeId, year } = req.query;
+    const statement = await payrollService.getSalaryStatement(employeeId, year);
+    return success(res, statement);
+  } catch (err) {
+    console.error('Get salary statement error:', err);
+    return error(res, err.message, 400);
+  }
+};
+
+// Get detailed salary statement for print
+exports.getDetailedSalaryStatement = async (req, res) => {
+  try {
+    const { employeeId, year } = req.query;
+    const statement = await payrollService.getDetailedSalaryStatement(employeeId, year);
+    return success(res, statement);
+  } catch (err) {
+    console.error('Get detailed salary statement error:', err);
+    return error(res, err.message, 400);
+  }
+};
+
 // Mark employee payroll as done
 exports.markPayrollDone = async (req, res) => {
   try {

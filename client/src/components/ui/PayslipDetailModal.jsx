@@ -73,7 +73,7 @@ export default function PayslipDetailModal({ employeeId, month, year, onClose })
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]">
         <div className="bg-white rounded-lg p-8 max-w-4xl w-full mx-4">
           <div className="text-center">
             <FaSpinner className="text-4xl text-blue-600 mx-auto mb-4 animate-spin" />
@@ -86,7 +86,7 @@ export default function PayslipDetailModal({ employeeId, month, year, onClose })
 
   if (error) {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]">
         <div className="bg-white rounded-lg p-8 max-w-4xl w-full mx-4">
           <div className="text-center">
             <p className="text-red-600 mb-4">{error}</p>
@@ -107,10 +107,10 @@ export default function PayslipDetailModal({ employeeId, month, year, onClose })
   const { employee, payrun, salaryStructure, workedDays, salaryComputation, monthlySalary } = payslipData
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999] p-4">
-      <div className="bg-white relative rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto my-8 shadow-2xl z-[9999]">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999] p-4">
+      <div className="bg-white relative rounded-lg max-w-5xl w-full max-h-[90vh] overflow-y-auto my-8 shadow-2xl">
         {/* Header with action buttons */}
-        <div className="border-b border-slate-200 p-6 sticky top-0 bg-white z-[10000] shadow-sm">
+        <div className="border-b border-slate-200 p-6 sticky top-0 bg-white z-10 shadow-sm">
           <div className="flex justify-between items-center mb-6">
             <div className="flex gap-3 flex-wrap">
               <button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded text-sm font-medium transition-colors">
