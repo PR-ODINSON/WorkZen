@@ -30,10 +30,22 @@ router.delete('/:id', payrollCtrl.remove);
 // GET /api/admin/payroll/payruns - Get all payruns
 router.get('/payruns/list', payrollCtrl.listPayruns);
 
+// GET /api/admin/payroll/payruns/current - Get current month payrun data
+router.get('/payruns/current', payrollCtrl.getCurrentPayrun);
+
 // POST /api/admin/payroll/payruns - Create new payrun
 router.post('/payruns', payrollCtrl.createPayrun);
 
 // PATCH /api/admin/payroll/payruns/:id/status - Update payrun status
 router.patch('/payruns/:id/status', payrollCtrl.updatePayrunStatus);
+
+// POST /api/admin/payroll/mark-done - Mark employee payroll as done
+router.post('/mark-done', payrollCtrl.markPayrollDone);
+
+// GET /api/admin/payroll/payslip/:employeeId - Get detailed payslip for employee
+router.get('/payslip/:employeeId', payrollCtrl.getEmployeePayslipDetail);
+
+// GET /api/admin/payroll/payslip/:employeeId/pdf - Generate PDF payslip for employee
+router.get('/payslip/:employeeId/pdf', payrollCtrl.generatePayslipPDF);
 
 module.exports = router;

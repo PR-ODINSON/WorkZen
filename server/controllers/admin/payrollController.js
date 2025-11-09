@@ -78,6 +78,17 @@ exports.listPayruns = async (req, res) => {
   }
 };
 
+// Get current payrun data with all employees
+exports.getCurrentPayrun = async (req, res) => {
+  try {
+    const result = await payrollService.getCurrentPayrunData();
+    return success(res, result);
+  } catch (err) {
+    console.error('Get current payrun error:', err);
+    return error(res, err.message);
+  }
+};
+
 exports.createPayrun = async (req, res) => {
   try {
     const payrun = await payrollService.createPayrun(req.body);
@@ -95,6 +106,57 @@ exports.updatePayrunStatus = async (req, res) => {
     return success(res, { payrun });
   } catch (err) {
     console.error('Update payrun status error:', err);
+    return error(res, err.message, 400);
+  }
+};
+
+// Mark employee payroll as done
+exports.markPayrollDone = async (req, res) => {
+  try {
+    const { employeeId } = req.body;
+    const result = await payrollService.markEmployeePayrollDone(employeeId);
+    return success(res, result);
+  } catch (err) {
+    console.error('Mark payroll done error:', err);
+    return error(res, err.message, 400);
+  }
+};
+
+// Get detailed payslip for an employee
+exports.getEmployeePayslipDetail = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const { month, year } = req.query;
+    const result = await payrollService.getEmployeePayslipDetail(employeeId, month, year);
+    return success(res, result);
+  } catch (err) {
+    console.error('Get employee payslip detail error:', err);
+    return error(res, err.message, 400);
+  }
+};
+
+// Generate PDF payslip for an employee
+exports.generatePayslipPDF = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const { month, year } = req.query;
+    
+    // Get payslip data (will fetch from stored Payroll model if status='done')
+    const payslipData = await payrollService.getEmployeePayslipDetail(employeeId, month, year);
+    
+    // Generate PDF
+    const { generatePayslipPDF } = require('../../utils/pdfGenerator');
+    const doc = generatePayslipPDF(payslipData);
+    
+    // Set response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=payslip-${payslipData.employee.name.replace(/\s+/g, '-')}-${month || new Date().getMonth()}-${year || new Date().getFullYear()}.pdf`);
+    
+    // Pipe the PDF to response
+    doc.pipe(res);
+    doc.end();
+  } catch (err) {
+    console.error('Generate payslip PDF error:', err);
     return error(res, err.message, 400);
   }
 };

@@ -19,6 +19,9 @@ const employeeSchema = new mongoose.Schema({
   manager: { type: String },
   location: { type: String },
   employeeId: { type: String, unique: true },
+  // Identity documents
+  pan: { type: String },
+  uan: { type: String },
   // Bank details for payroll
   bankName: { type: String },
   bankAccountNumber: { type: String },

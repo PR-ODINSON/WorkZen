@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   FaMoneyCheckAlt,
   FaTachometerAlt,
@@ -8,7 +9,21 @@ import PayrollDashboard from './PayrollDashboard'
 import PayrollPayrun from './PayrollPayrun'
 
 export default function Payroll() {
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabFromUrl = searchParams.get('tab') || 'dashboard'
+  const [activeTab, setActiveTab] = useState(tabFromUrl)
+
+  useEffect(() => {
+    const tab = searchParams.get('tab')
+    if (tab && (tab === 'dashboard' || tab === 'payrun')) {
+      setActiveTab(tab)
+    }
+  }, [searchParams])
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId)
+    setSearchParams({ tab: tabId })
+  }
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: FaTachometerAlt },
@@ -40,7 +55,7 @@ export default function Payroll() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
                   activeTab === tab.id
                     ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'

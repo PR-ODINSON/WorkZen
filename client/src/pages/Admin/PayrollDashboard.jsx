@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   FaExclamationTriangle,
   FaMoneyBillWave,
@@ -8,6 +9,7 @@ import {
 import payrollService from '../../services/payrollService'
 
 export default function PayrollDashboard() {
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [dashboardData, setDashboardData] = useState({
     warnings: {
@@ -27,11 +29,16 @@ export default function PayrollDashboard() {
     setLoading(true)
     try {
       const response = await payrollService.getDashboard()
-      console.log('Dashboard API response:', response)
-      if (response.success && response.data) {
-        setDashboardData(response.data)
-      } else {
-        console.warn('No data in response:', response)
+      
+      if (response.success) {
+        // The data is spread directly in the response by the backend
+        const newDashboardData = {
+          warnings: response.warnings || { employeesWithoutBank: [], employeesWithoutManager: [] },
+          payruns: response.payruns || [],
+          monthlyStats: response.monthlyStats || [],
+          totalEmployees: response.totalEmployees || 0
+        }
+        setDashboardData(newDashboardData)
       }
     } catch (error) {
       console.error('Error fetching payroll dashboard:', error)
@@ -45,12 +52,15 @@ export default function PayrollDashboard() {
   }
 
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount || 0)
+    return `₹ ${amount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`
+  }
+
+  const handlePayrunClick = () => {
+    // Navigate to Payrun tab
+    navigate('/admin/payroll?tab=payrun')
   }
 
   if (loading) {
@@ -108,49 +118,12 @@ export default function PayrollDashboard() {
         </div>
       )}
 
-      {/* Payrun List */}
-      <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
-        <h3 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <FaMoneyBillWave className="text-blue-600" /> Payrun
-        </h3>
-        
-        {payruns.length === 0 ? (
-          <p className="text-slate-500 text-center py-8">No payruns created yet</p>
-        ) : (
-          <div className="space-y-3">
-            {payruns.slice(0, 10).map(payrun => (
-              <div 
-                key={payrun.id} 
-                className="flex items-center justify-between p-4 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                    <FaMoneyBillWave className="text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-slate-800">{payrun.displayName}</p>
-                    <p className="text-sm text-slate-500">
-                      {payrun.status === 'draft' && '📝 Draft'}
-                      {payrun.status === 'processed' && '✅ Processed'}
-                      {payrun.status === 'paid' && '💰 Paid'}
-                    </p>
-                  </div>
-                </div>
-                <button className="text-blue-600 hover:text-blue-700 font-medium text-sm">
-                  View Details →
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Employer Cost Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Net Wages Chart */}
         <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-slate-800">Employer Cost</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Total Net Wages (Monthly)</h3>
             <div className="flex items-center gap-4">
               <button className="text-sm text-slate-600 hover:text-slate-800">Annually</button>
               <button className="text-sm font-semibold text-blue-600 border-b-2 border-blue-600">Monthly</button>
@@ -172,7 +145,7 @@ export default function PayrollDashboard() {
                       <div className="h-12 bg-slate-100 rounded-lg overflow-hidden">
                         <div 
                           className="h-full bg-gradient-to-r from-blue-400 to-blue-500 rounded-lg transition-all duration-500 flex items-center justify-end pr-3"
-                          style={{ width: `${heightPercent}%` }}
+                          style={{ width: `${Math.max(heightPercent, 5)}%` }}
                         >
                           {heightPercent > 20 && (
                             <span className="text-white text-sm font-semibold">
@@ -181,9 +154,9 @@ export default function PayrollDashboard() {
                           )}
                         </div>
                       </div>
-                      {heightPercent <= 20 && stat.employerCost > 0 && (
+                      {(heightPercent <= 20 || heightPercent === 0) && (
                         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-700 text-sm font-semibold">
-                          {formatCurrency(stat.employerCost)}
+                          {stat.employerCost > 0 ? formatCurrency(stat.employerCost) : '₹ 0.00'}
                         </span>
                       )}
                     </div>
@@ -199,7 +172,7 @@ export default function PayrollDashboard() {
         {/* Employee Count Chart */}
         <div className="bg-white rounded-lg shadow-md border border-slate-200 p-6">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-slate-800">Employee Count</h3>
+            <h3 className="text-lg font-semibold text-slate-800">Employees Paid (Monthly)</h3>
             <div className="flex items-center gap-4">
               <button className="text-sm text-slate-600 hover:text-slate-800">Annually</button>
               <button className="text-sm font-semibold text-blue-600 border-b-2 border-blue-600">Monthly</button>
@@ -221,18 +194,18 @@ export default function PayrollDashboard() {
                       <div className="h-12 bg-slate-100 rounded-lg overflow-hidden">
                         <div 
                           className="h-full bg-gradient-to-r from-indigo-400 to-indigo-500 rounded-lg transition-all duration-500 flex items-center justify-end pr-3"
-                          style={{ width: `${heightPercent}%` }}
+                          style={{ width: `${Math.max(heightPercent, 5)}%` }}
                         >
                           {heightPercent > 20 && (
                             <span className="text-white text-sm font-semibold">
-                              {stat.employeeCount}
+                              {stat.employeeCount} {stat.employeeCount === 1 ? 'Employee' : 'Employees'}
                             </span>
                           )}
                         </div>
                       </div>
-                      {heightPercent <= 20 && stat.employeeCount > 0 && (
+                      {(heightPercent <= 20 || heightPercent === 0) && (
                         <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-700 text-sm font-semibold">
-                          {stat.employeeCount}
+                          {stat.employeeCount} {stat.employeeCount === 1 ? 'Employee' : 'Employees'}
                         </span>
                       )}
                     </div>

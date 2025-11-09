@@ -1,85 +1,166 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaUserCircle, FaKey, FaBriefcase, FaLock, FaRegIdBadge } from 'react-icons/fa'
+import { useAuth } from '../../context/AuthContext'
+import api from '../../api'
 
 export default function MyProfile() {
-  const userName = localStorage.getItem('userName') || 'Admin User'
-  const userEmail = localStorage.getItem('userEmail') || 'admin@workzen.com'
-
+  const { user } = useAuth()
   const [activeTab, setActiveTab] = useState('resume')
-  const [skills, setSkills] = useState(['JavaScript', 'React', 'Node.js', 'MongoDB'])
-  const [certifications, setCertifications] = useState(['AWS Certified', 'PMP Certified'])
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [profile, setProfile] = useState(null)
+  const [skills, setSkills] = useState([])
+  const [certifications, setCertifications] = useState([])
+  const [about, setAbout] = useState('')
+  const [editingAbout, setEditingAbout] = useState(false)
   const [newSkill, setNewSkill] = useState('')
   const [newCertification, setNewCertification] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
-  const addSkill = () => {
+  // Fetch profile data on mount
+  useEffect(() => {
+    fetchProfile()
+  }, [])
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true)
+      const response = await api.get('/profile')
+      if (response.data.success && response.data.profile) {
+        const profileData = response.data.profile
+        setProfile(profileData)
+        setSkills(profileData.skills || [])
+        setCertifications(profileData.certifications || [])
+        setAbout(profileData.about || '')
+      }
+    } catch (error) {
+      console.error('Error fetching profile:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const showSuccess = (message) => {
+    setSuccessMessage(message)
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
+
+  const saveResume = async () => {
+    try {
+      setSaving(true)
+      const response = await api.put('/profile/resume', {
+        skills,
+        certifications,
+        about
+      })
+      if (response.data.success) {
+        showSuccess('Resume updated successfully!')
+        setProfile(response.data.profile)
+      }
+    } catch (error) {
+      console.error('Error saving resume:', error)
+      alert('Failed to save resume. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const addSkill = async () => {
     if (newSkill.trim()) {
-      setSkills([...skills, newSkill.trim()])
+      const updatedSkills = [...skills, newSkill.trim()]
+      setSkills(updatedSkills)
       setNewSkill('')
+      await saveResumeField('skills', updatedSkills)
     }
   }
 
-  const addCertification = () => {
+  const addCertification = async () => {
     if (newCertification.trim()) {
-      setCertifications([...certifications, newCertification.trim()])
+      const updatedCertifications = [...certifications, newCertification.trim()]
+      setCertifications(updatedCertifications)
       setNewCertification('')
+      await saveResumeField('certifications', updatedCertifications)
     }
   }
 
-  const removeSkill = (index) => {
-    setSkills(skills.filter((_, i) => i !== index))
+  const removeSkill = async (index) => {
+    const updatedSkills = skills.filter((_, i) => i !== index)
+    setSkills(updatedSkills)
+    await saveResumeField('skills', updatedSkills)
   }
 
-  const removeCertification = (index) => {
-    setCertifications(certifications.filter((_, i) => i !== index))
+  const removeCertification = async (index) => {
+    const updatedCertifications = certifications.filter((_, i) => i !== index)
+    setCertifications(updatedCertifications)
+    await saveResumeField('certifications', updatedCertifications)
+  }
+
+  const saveResumeField = async (field, value) => {
+    try {
+      const updateData = { skills, certifications, about }
+      updateData[field] = value
+      const response = await api.put('/profile/resume', updateData)
+      if (response.data.success) {
+        showSuccess(`${field.charAt(0).toUpperCase() + field.slice(1)} updated!`)
+      }
+    } catch (error) {
+      console.error('Error updating:', error)
+    }
+  }
+
+  const saveAbout = async () => {
+    await saveResumeField('about', about)
+    setEditingAbout(false)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-indigo-50 p-6 rounded-3xl space-y-8">
-      {/* Header Section */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-500 text-white shadow-xl p-6 mb-6">
-        <div className="relative z-10 flex items-center gap-5">
-          <div className="bg-white/20 p-4 rounded-full backdrop-blur-sm">
-            <FaUserCircle className="text-white text-4xl" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold mb-1">My Profile</h1>
-            <p className="text-blue-100">Manage your personal, professional, and security details</p>
-          </div>
+    <div className="rounded-3xl space-y-8">
+      {/* Success Message */}
+      {successMessage && (
+        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative">
+          {successMessage}
         </div>
-      </section>
+      )}
 
-      {/* Profile Info */}
-      <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-blue-100 p-8">
-        <div className="flex items-start gap-6 mb-8 border-b border-blue-100 pb-6">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center shadow-lg">
-              <div className="w-28 h-28 rounded-full bg-white/90 flex items-center justify-center text-4xl text-blue-700 font-bold">
-                {userName.charAt(0)}
-              </div>
-            </div>
-          </div>
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-800 mb-2">{userName}</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-              <div>
-                <p className="text-gray-500">Login ID</p>
-                <p>{userEmail}</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Company</p>
-                <p>WorkZen Pvt. Ltd.</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Department</p>
-                <p>Administration</p>
-              </div>
-              <div>
-                <p className="text-gray-500">Location</p>
-                <p>Mumbai, India</p>
-              </div>
-            </div>
-          </div>
+      {/* Loading State */}
+      {loading ? (
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-blue-100 p-8">
+          <div className="text-center text-gray-600">Loading profile...</div>
         </div>
+      ) : (
+        <>
+          {/* Profile Info */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-blue-100 p-8">
+            <div className="flex items-start gap-6 mb-8 border-b border-blue-100 pb-6">
+              <div className="relative">
+                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center shadow-lg">
+                  <div className="w-28 h-28 rounded-full bg-white/90 flex items-center justify-center text-4xl text-blue-700 font-bold">
+                    {user?.name?.charAt(0) || 'A'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">{user?.name || 'Admin User'}</h2>
+                <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
+                  <div>
+                    <p className="text-gray-500">Login ID</p>
+                    <p>{user?.email || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Company</p>
+                    <p>Odoo India</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Department</p>
+                    <p>Administration</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Location</p>
+                    <p>{user?.location || 'India'}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
         {/* Tabs */}
         <div className="flex gap-3 border-b border-blue-100 mb-8">
@@ -108,20 +189,49 @@ export default function MyProfile() {
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-7">
               <div className="bg-blue-50 rounded-xl p-6 border border-blue-100 shadow-sm">
-                <h3 className="text-xl font-semibold text-blue-700 mb-4">About Me</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  I am a passionate software engineer who loves building products that make work
-                  smarter. I enjoy solving complex problems and contributing to high-impact projects.
-                </p>
-
-                <h4 className="mt-6 font-semibold text-blue-700">What I Love About My Job</h4>
-                <p className="text-gray-600 text-sm mt-2">
-                  Building systems that empower teams to do their best work while learning something
-                  new every day.
-                </p>
-
-                <h4 className="mt-6 font-semibold text-blue-700">Hobbies & Interests</h4>
-                <p className="text-gray-600 text-sm mt-2">Coding, Reading, and Astronomy 🌌</p>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-blue-700">About Me</h3>
+                  {!editingAbout ? (
+                    <button
+                      onClick={() => setEditingAbout(true)}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button
+                        onClick={saveAbout}
+                        disabled={saving}
+                        className="text-sm text-green-600 hover:text-green-700 font-medium disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => {
+                          setAbout(profile?.about || '')
+                          setEditingAbout(false)
+                        }}
+                        className="text-sm text-gray-600 hover:text-gray-700 font-medium"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                {editingAbout ? (
+                  <textarea
+                    value={about}
+                    onChange={(e) => setAbout(e.target.value)}
+                    placeholder="Tell us about yourself, what you love about your job, your hobbies and interests..."
+                    className="w-full h-64 bg-white border border-blue-200 px-4 py-3 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  />
+                ) : (
+                  <div className="text-gray-600 text-sm leading-relaxed whitespace-pre-wrap">
+                    {about || 'Click "Edit" to add information about yourself.'}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -217,6 +327,8 @@ export default function MyProfile() {
           </div>
         )}
       </div>
+        </>
+      )}
     </div>
   )
 }

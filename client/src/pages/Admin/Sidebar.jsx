@@ -42,7 +42,7 @@ const AdminSidebar = () => {
       animate={isCollapsed ? 'collapsed' : 'expanded'}
       variants={sidebarVariants}
       transition={{ duration: 0.3, ease: 'easeInOut' }}
-      className="bg-gradient-to-b from-white via-blue-50 to-indigo-50 text-gray-800 min-h-screen flex flex-col fixed left-0 top-0 bottom-0 z-40 shadow-xl border-r border-blue-100 overflow-hidden"
+      className="bg-gradient-to-b from-white via-blue-50 to-indigo-50 text-gray-800 min-h-screen flex flex-col fixed left-0 top-0 bottom-0 z-20 shadow-xl border-r border-blue-100 overflow-hidden"
     >
       {/* Header */}
       <motion.div

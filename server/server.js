@@ -24,6 +24,9 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/leaves', require('./routes/leaves'));
 
+// Profile routes (for all authenticated users)
+app.use('/api/profile', require('./routes/profile'));
+
 // Admin routes
 app.use('/api/admin/employees', require('./routes/admin/employees'));
 app.use('/api/admin/users', require('./routes/admin/users'));
