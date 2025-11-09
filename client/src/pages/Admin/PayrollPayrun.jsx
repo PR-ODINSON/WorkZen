@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { FaMoneyCheckAlt, FaCheckCircle, FaSpinner } from 'react-icons/fa'
+import { FaMoneyCheckAlt, FaCheckCircle, FaSpinner, FaExclamationTriangle } from 'react-icons/fa'
 import api from '../../api'
 import PayslipDetailModal from '../../components/ui/PayslipDetailModal'
 
@@ -133,10 +133,22 @@ export default function PayrollPayrun() {
               {payrunData.map((item, index) => (
                 <tr 
                   key={item.employeeId} 
-                  className="hover:bg-slate-50 transition-colors"
+                  className={`hover:bg-slate-50 transition-colors ${!item.hasBankDetails ? 'bg-yellow-50' : ''}`}
                 >
                   <td className="px-4 py-3 text-sm text-slate-600">{item.payPeriod}</td>
-                  <td className="px-4 py-3 text-sm font-medium text-slate-800">{item.employeeName}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-slate-800">{item.employeeName}</span>
+                      {!item.hasBankDetails && (
+                        <div className="group relative">
+                          <FaExclamationTriangle className="text-yellow-500 text-sm cursor-help" />
+                          <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block z-10 w-48 p-2 text-xs bg-gray-800 text-white rounded shadow-lg">
+                            No bank account details found in profile
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-sm text-right text-slate-700">{formatCurrency(item.employerCost)}</td>
                   <td className="px-4 py-3 text-sm text-right text-slate-700">{formatCurrency(item.basicWage)}</td>
                   <td className="px-4 py-3 text-sm text-right text-green-600 font-medium">{formatCurrency(item.grossWage)}</td>
@@ -152,8 +164,13 @@ export default function PayrollPayrun() {
                     ) : (
                       <button
                         onClick={() => handleMarkDone(item.employeeId)}
-                        disabled={processingEmployees.has(item.employeeId)}
-                        className="bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-1.5 rounded-lg text-xs font-medium hover:from-green-600 hover:to-green-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1 animate-pulse"
+                        disabled={processingEmployees.has(item.employeeId) || !item.hasBankDetails}
+                        title={!item.hasBankDetails ? 'Bank details required to process payroll' : ''}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-medium transition-all shadow-md inline-flex items-center gap-1 ${
+                          !item.hasBankDetails 
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                            : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:shadow-lg animate-pulse'
+                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                       >
                         {processingEmployees.has(item.employeeId) ? (
                           <>

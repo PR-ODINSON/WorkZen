@@ -172,13 +172,24 @@ class PayrollService {
    * Get payroll dashboard data
    */
   async getPayrollDashboard() {
+    const UserProfile = require('../models/UserProfile');
+    
     // Get all employees
     const allEmployees = await Employee.find({});
     
-    // Find employees without bank account
-    const employeesWithoutBank = allEmployees.filter(emp => 
-      !emp.bankAccountNumber || !emp.bankName
-    );
+    // Get all user profiles with bank details
+    const allUserProfiles = await UserProfile.find({});
+    const userProfileMap = new Map();
+    allUserProfiles.forEach(profile => {
+      userProfileMap.set(profile.userId.toString(), profile);
+    });
+    
+    // Find employees without bank account in UserProfile
+    const employeesWithoutBank = allEmployees.filter(emp => {
+      const userProfile = userProfileMap.get(emp.userId.toString());
+      const bankDetails = userProfile?.privateInfo?.bankDetails;
+      return !bankDetails || !bankDetails.accountNumber || !bankDetails.bankName;
+    });
     
     // Find employees without manager
     const employeesWithoutManager = allEmployees.filter(emp => 
@@ -359,6 +370,8 @@ class PayrollService {
    * Get current month payrun data with all employees
    */
   async getCurrentPayrunData() {
+    const UserProfile = require('../models/UserProfile');
+    
     // Get previous month (since payrun is typically for the previous month)
     const now = new Date();
     const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -371,6 +384,13 @@ class PayrollService {
     
     // Get all employees
     const employees = await Employee.find({}).sort({ name: 1 });
+    
+    // Get all user profiles with bank details
+    const allUserProfiles = await UserProfile.find({});
+    const userProfileMap = new Map();
+    allUserProfiles.forEach(profile => {
+      userProfileMap.set(profile.userId.toString(), profile);
+    });
     
     // Get existing payroll records for this month
     const existingPayrolls = await Payroll.find({ month, year });
@@ -411,6 +431,11 @@ class PayrollService {
       const calculations = this.calculateSalaryComponents(employerCost);
       const existingPayroll = payrollMap.get(emp._id.toString());
       
+      // Check if employee has bank details in UserProfile
+      const userProfile = userProfileMap.get(emp.userId.toString());
+      const bankDetails = userProfile?.privateInfo?.bankDetails;
+      const hasBankDetails = !!(bankDetails && bankDetails.accountNumber && bankDetails.bankName);
+      
       return {
         employeeId: emp._id,
         employeeName: emp.name,
@@ -424,6 +449,7 @@ class PayrollService {
         netWage: calculations.netSalary,
         status: existingPayroll ? 'Done' : 'Pending',
         payrollId: existingPayroll?._id,
+        hasBankDetails, // New field to indicate if bank details exist
         calculations // Include full breakdown for potential detail view
       };
     });
@@ -475,6 +501,7 @@ class PayrollService {
    */
   async markEmployeePayrollDone(employeeId) {
     const Leave = require('../models/Leave');
+    const UserProfile = require('../models/UserProfile');
     
     const now = new Date();
     const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -485,6 +512,14 @@ class PayrollService {
     const employee = await Employee.findById(employeeId);
     if (!employee) {
       throw new Error('Employee not found');
+    }
+    
+    // Check if employee has bank details in UserProfile
+    const userProfile = await UserProfile.findOne({ userId: employee.userId });
+    const bankDetails = userProfile?.privateInfo?.bankDetails;
+    
+    if (!bankDetails || !bankDetails.accountNumber || !bankDetails.bankName) {
+      throw new Error('Employee does not have bank account details. Please update the profile before processing payroll.');
     }
     
     // Calculate working days in the month
@@ -613,9 +648,9 @@ class PayrollService {
         designation: employee.designation || 'N/A',
         location: employee.location || 'N/A',
         dateOfJoining: employee.joiningDate ? new Date(employee.joiningDate).toLocaleDateString('en-GB') : 'N/A',
-        pan: employee.pan || 'XXXxxxxxx3',
-        uan: employee.uan || '234234234243',
-        bankAccount: employee.bankAccountNumber || '234234234532'
+        pan: bankDetails?.panNumber || employee.pan || 'XXXxxxxxx3',
+        uan: bankDetails?.uanNumber || employee.uan || '234234234243',
+        bankAccount: bankDetails?.accountNumber || employee.bankAccountNumber || '234234234532'
       }
     };
     
