@@ -7,8 +7,6 @@ const EmployeeSidebar = () => {
   const links = [
     { label: 'My Attendance', to: '/employee/attendance', icon: '📅' },
     { label: 'Time Off', to: '/employee/timeoff', icon: '🏖️' },
-    { label: 'Payslips', to: '/employee/payroll', icon: '💰' },
-    { label: 'Reports', to: '/employee/reports', icon: '📈' },
     { label: 'My Profile', to: '/employee/profile', icon: '👤' },
   ]
 

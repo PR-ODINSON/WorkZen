@@ -189,7 +189,7 @@ const Navbar = () => {
   console.log('Navbar render - has checkIn:', userAttendanceStatus?.checkIn)
 
   return (
-    <header className=" bg-white fixed top-0 right-0 left-0 z-10 flex items-center  w-full justify-between px-6 py-2">
+    <header className=" bg-white fixed top-0 right-0 left-0 z-30 flex items-center  w-full justify-between px-6 py-2">
       {/* Left side - Title */}
       <div className="flex items-center">
       </div>

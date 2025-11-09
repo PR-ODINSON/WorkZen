@@ -1,4 +1,6 @@
 const UserProfile = require('../models/UserProfile');
+const Employee = require('../models/Employee');
+const User = require('../models/User');
 const { success, error } = require('../utils/response');
 
 // Get user profile
@@ -17,7 +19,13 @@ exports.getProfile = async (req, res) => {
       });
     }
     
-    success(res, { profile });
+    // Fetch user details
+    const userDetails = await User.findById(req.user.id).select('-password');
+    
+    // Fetch employee details if exists
+    const employee = await Employee.findOne({ userId: req.user.id });
+    
+    success(res, { profile, user: userDetails, employee });
   } catch (err) {
     console.error('Get profile error:', err);
     error(res, 'Error fetching profile', 500);

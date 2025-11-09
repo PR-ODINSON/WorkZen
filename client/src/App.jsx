@@ -186,8 +186,6 @@ export default function App() {
       {[
         { path: '/employee/attendance', page: <Employee.Attendance /> },
         { path: '/employee/timeoff', page: <Employee.TimeOff /> },
-        { path: '/employee/payroll', page: <Employee.Payroll /> },
-        { path: '/employee/reports', page: <Employee.Reports /> },
         { path: '/employee/profile', page: <Employee.MyProfile /> },
       ].map(({ path, page }) => (
         <Route

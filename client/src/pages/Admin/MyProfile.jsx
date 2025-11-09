@@ -9,6 +9,8 @@ export default function MyProfile() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState(null)
+  const [employee, setEmployee] = useState(null)
+  const [userDetails, setUserDetails] = useState(null)
   const [skills, setSkills] = useState([])
   const [certifications, setCertifications] = useState([])
   const [about, setAbout] = useState('')
@@ -16,6 +18,26 @@ export default function MyProfile() {
   const [newSkill, setNewSkill] = useState('')
   const [newCertification, setNewCertification] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
+
+  // Private Info state
+  const [privateInfo, setPrivateInfo] = useState({
+    dateOfBirth: '',
+    address: '',
+    nationality: 'Indian',
+    personalEmail: '',
+    gender: '',
+    maritalStatus: '',
+    joiningDate: '',
+    bankDetails: {
+      accountNumber: '',
+      bankName: '',
+      ifscCode: '',
+      panNumber: '',
+      uanNumber: '',
+      employeeCode: ''
+    }
+  })
+  const [editingPrivateInfo, setEditingPrivateInfo] = useState(false)
 
   // Fetch profile data on mount
   useEffect(() => {
@@ -32,6 +54,44 @@ export default function MyProfile() {
         setSkills(profileData.skills || [])
         setCertifications(profileData.certifications || [])
         setAbout(profileData.about || '')
+        
+        // Set user details if available
+        if (response.data.user) {
+          setUserDetails(response.data.user)
+        }
+        
+        // Set employee data if available
+        if (response.data.employee) {
+          setEmployee(response.data.employee)
+        }
+
+        // Set private info with employee joining date and user email
+        const empJoiningDate = response.data.employee?.joiningDate 
+          ? new Date(response.data.employee.joiningDate).toISOString().split('T')[0] 
+          : ''
+        
+        const userEmail = response.data.employee?.email || response.data.user?.email || ''
+        const empCode = response.data.employee?.employeeId || ''
+
+        setPrivateInfo({
+          dateOfBirth: profileData.privateInfo?.dateOfBirth 
+            ? new Date(profileData.privateInfo.dateOfBirth).toISOString().split('T')[0] 
+            : '',
+          address: profileData.privateInfo?.address || '',
+          nationality: profileData.privateInfo?.nationality || 'Indian',
+          personalEmail: profileData.privateInfo?.personalEmail || userEmail,
+          gender: profileData.privateInfo?.gender || '',
+          maritalStatus: profileData.privateInfo?.maritalStatus || '',
+          joiningDate: empJoiningDate,
+          bankDetails: {
+            accountNumber: profileData.privateInfo?.bankDetails?.accountNumber || '',
+            bankName: profileData.privateInfo?.bankDetails?.bankName || '',
+            ifscCode: profileData.privateInfo?.bankDetails?.ifscCode || '',
+            panNumber: profileData.privateInfo?.bankDetails?.panNumber || '',
+            uanNumber: profileData.privateInfo?.bankDetails?.uanNumber || '',
+            employeeCode: empCode
+          }
+        })
       }
     } catch (error) {
       console.error('Error fetching profile:', error)
@@ -113,6 +173,41 @@ export default function MyProfile() {
     setEditingAbout(false)
   }
 
+  const savePrivateInfo = async () => {
+    try {
+      setSaving(true)
+      const response = await api.put('/profile/private', privateInfo)
+      if (response.data.success) {
+        showSuccess('Private information updated successfully!')
+        setProfile(response.data.profile)
+        setEditingPrivateInfo(false)
+      }
+    } catch (error) {
+      console.error('Error saving private info:', error)
+      alert('Failed to save private information. Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handlePrivateInfoChange = (field, value) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.')
+      setPrivateInfo(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }))
+    } else {
+      setPrivateInfo(prev => ({
+        ...prev,
+        [field]: value
+      }))
+    }
+  }
+
   return (
     <div className="rounded-3xl space-y-8">
       {/* Success Message */}
@@ -135,16 +230,26 @@ export default function MyProfile() {
               <div className="relative">
                 <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center shadow-lg">
                   <div className="w-28 h-28 rounded-full bg-white/90 flex items-center justify-center text-4xl text-blue-700 font-bold">
-                    {user?.name?.charAt(0) || 'A'}
+                    {employee?.name?.charAt(0) || user?.name?.charAt(0) || 'A'}
                   </div>
                 </div>
               </div>
               <div className="flex-1">
-                <h2 className="text-3xl font-bold text-gray-800 mb-2">{user?.name || 'Admin User'}</h2>
+                <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                  {employee?.name || user?.name || 'Admin User'}
+                </h2>
                 <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
                   <div>
                     <p className="text-gray-500">Login ID</p>
-                    <p>{user?.email || 'N/A'}</p>
+                    <p>{userDetails?.loginId || userDetails?.email || 'ADMIN-001'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Email</p>
+                    <p>{employee?.email || userDetails?.email || user?.email || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Phone</p>
+                    <p>{employee?.phone || userDetails?.phone || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Company</p>
@@ -152,11 +257,15 @@ export default function MyProfile() {
                   </div>
                   <div>
                     <p className="text-gray-500">Department</p>
-                    <p>Administration</p>
+                    <p>{employee?.department || 'Administration'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Manager</p>
+                    <p>{employee?.manager || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-gray-500">Location</p>
-                    <p>{user?.location || 'India'}</p>
+                    <p>{employee?.location || 'India'}</p>
                   </div>
                 </div>
               </div>
@@ -167,7 +276,6 @@ export default function MyProfile() {
           {[
             { key: 'resume', label: 'Resume', icon: <FaBriefcase /> },
             { key: 'private', label: 'Private Info', icon: <FaRegIdBadge /> },
-            { key: 'salary', label: 'Salary Info', icon: <FaKey /> },
             { key: 'security', label: 'Security', icon: <FaLock /> },
           ].map((tab) => (
             <button
@@ -315,15 +423,255 @@ export default function MyProfile() {
         )}
 
         {/* Private Info, Salary, Security Tabs */}
-        {activeTab !== 'resume' && (
+        {activeTab === 'private' && (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-2xl font-semibold text-gray-800">Private Information</h3>
+              {!editingPrivateInfo ? (
+                <button
+                  onClick={() => setEditingPrivateInfo(true)}
+                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-500 text-white rounded-lg hover:opacity-90 shadow-md"
+                >
+                  Edit
+                </button>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={savePrivateInfo}
+                    disabled={saving}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-md"
+                  >
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      fetchProfile()
+                      setEditingPrivateInfo(false)
+                    }}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 shadow-md"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-8">
+              {/* Left Column - Personal Details */}
+              <div className="space-y-4">
+                {/* Date of Birth */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date of Birth
+                  </label>
+                  <input
+                    type="date"
+                    value={privateInfo.dateOfBirth}
+                    onChange={(e) => handlePrivateInfoChange('dateOfBirth', e.target.value)}
+                    disabled={!editingPrivateInfo}
+                    className="w-full bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                {/* Residing Address */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Residing Address
+                  </label>
+                  <textarea
+                    value={privateInfo.address}
+                    onChange={(e) => handlePrivateInfoChange('address', e.target.value)}
+                    disabled={!editingPrivateInfo}
+                    rows="3"
+                    className="w-full bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed resize-none"
+                    placeholder="Enter your complete address"
+                  />
+                </div>
+
+                {/* Nationality */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nationality
+                  </label>
+                  <input
+                    type="text"
+                    value={privateInfo.nationality}
+                    onChange={(e) => handlePrivateInfoChange('nationality', e.target.value)}
+                    disabled={!editingPrivateInfo}
+                    className="w-full bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                    placeholder="Enter your nationality"
+                  />
+                </div>
+
+                {/* Personal Email (Read-only) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Personal Email
+                  </label>
+                  <input
+                    type="email"
+                    value={privateInfo.personalEmail}
+                    disabled
+                    className="w-full bg-gray-100 border border-gray-300 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Same as registered email</p>
+                </div>
+
+                {/* Gender */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gender
+                  </label>
+                  <select
+                    value={privateInfo.gender}
+                    onChange={(e) => handlePrivateInfoChange('gender', e.target.value)}
+                    disabled={!editingPrivateInfo}
+                    className="w-full bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                {/* Marital Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Marital Status
+                  </label>
+                  <select
+                    value={privateInfo.maritalStatus}
+                    onChange={(e) => handlePrivateInfoChange('maritalStatus', e.target.value)}
+                    disabled={!editingPrivateInfo}
+                    className="w-full bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  >
+                    <option value="">Select Marital Status</option>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widowed">Widowed</option>
+                  </select>
+                </div>
+
+                {/* Date of Joining (Read-only) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date of Joining
+                  </label>
+                  <input
+                    type="date"
+                    value={privateInfo.joiningDate}
+                    disabled
+                    className="w-full bg-gray-100 border border-gray-300 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Extracted from employee database</p>
+                </div>
+              </div>
+
+              {/* Right Column - Bank Details */}
+              <div className="bg-blue-50 rounded-xl p-6 border border-blue-100">
+                <h4 className="text-lg font-semibold text-blue-700 mb-4">Bank Details</h4>
+                <div className="space-y-4">
+                  {/* Account Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Account Number
+                    </label>
+                    <input
+                      type="text"
+                      value={privateInfo.bankDetails.accountNumber}
+                      onChange={(e) => handlePrivateInfoChange('bankDetails.accountNumber', e.target.value)}
+                      disabled={!editingPrivateInfo}
+                      className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Enter account number"
+                    />
+                  </div>
+
+                  {/* Bank Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Bank Name
+                    </label>
+                    <input
+                      type="text"
+                      value={privateInfo.bankDetails.bankName}
+                      onChange={(e) => handlePrivateInfoChange('bankDetails.bankName', e.target.value)}
+                      disabled={!editingPrivateInfo}
+                      className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Enter bank name"
+                    />
+                  </div>
+
+                  {/* IFSC Code */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      IFSC Code
+                    </label>
+                    <input
+                      type="text"
+                      value={privateInfo.bankDetails.ifscCode}
+                      onChange={(e) => handlePrivateInfoChange('bankDetails.ifscCode', e.target.value)}
+                      disabled={!editingPrivateInfo}
+                      className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Enter IFSC code"
+                    />
+                  </div>
+
+                  {/* PAN Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      PAN No
+                    </label>
+                    <input
+                      type="text"
+                      value={privateInfo.bankDetails.panNumber}
+                      onChange={(e) => handlePrivateInfoChange('bankDetails.panNumber', e.target.value.toUpperCase())}
+                      disabled={!editingPrivateInfo}
+                      className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed uppercase"
+                      placeholder="Enter PAN number"
+                      maxLength="10"
+                    />
+                  </div>
+
+                  {/* UAN Number */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      UAN NO
+                    </label>
+                    <input
+                      type="text"
+                      value={privateInfo.bankDetails.uanNumber}
+                      onChange={(e) => handlePrivateInfoChange('bankDetails.uanNumber', e.target.value)}
+                      disabled={!editingPrivateInfo}
+                      className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      placeholder="Enter UAN number"
+                      maxLength="12"
+                    />
+                  </div>
+
+                  {/* Employee Code */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Emp Code
+                    </label>
+                    <input
+                      type="text"
+                      value={privateInfo.bankDetails.employeeCode}
+                      disabled
+                      className="w-full bg-gray-100 border border-blue-200 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Extracted from employee database</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'security' && (
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm text-gray-600">
-            <p>
-              {activeTab === 'private'
-                ? 'Private Information management section coming soon.'
-                : activeTab === 'salary'
-                ? 'Salary and payroll breakdown tools available here.'
-                : 'Security settings and password update tools will appear here.'}
-            </p>
+            <p>Security settings and password update tools will appear here.</p>
           </div>
         )}
       </div>
