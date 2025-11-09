@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const attendanceCtrl = require('../../controllers/admin/attendanceController');
-const { verifyToken, adminOnly } = require('../../middlewares/authMiddleware');
+const { verifyToken, allowRoles } = require('../../middlewares/authMiddleware');
 
 // Apply auth middleware to all routes
 router.use(verifyToken);
@@ -16,8 +16,8 @@ router.post('/checkout', attendanceCtrl.checkOutUser);
 // GET /api/admin/attendance/today - Get today's attendance status for logged-in user
 router.get('/today', attendanceCtrl.getTodayUserStatus);
 
-// Admin-only routes
-router.use(adminOnly);
+// Admin and PayrollOfficer routes
+router.use(allowRoles('Admin', 'PayrollOfficer'));
 
 // GET /api/admin/attendance - Get all attendance records
 router.get('/', attendanceCtrl.list);

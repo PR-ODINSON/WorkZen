@@ -5,9 +5,7 @@ const PayrollOfficerSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
 
   const links = [
-    { label: 'Employees', to: '/payroll/employees', icon: '👥' },
     { label: 'Attendance', to: '/payroll/attendance', icon: '📅' },
-    { label: 'Time Off', to: '/payroll/timeoff', icon: '🏖️' },
     { label: 'Payroll', to: '/payroll/payroll', icon: '💰' },
     { label: 'Reports', to: '/payroll/reports', icon: '📈' },
     { label: 'My Profile', to: '/payroll/profile', icon: '👤' },

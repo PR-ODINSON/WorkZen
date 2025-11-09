@@ -29,7 +29,7 @@ const RoleProtectedRoute = ({ children, allowedRoles }) => {
     const roleRoutes = {
       'admin': '/admin/employees',
       'hr': '/hr/employees',
-      'payrollofficer': '/payroll/employees',
+      'payrollofficer': '/payroll/attendance',
       'employee': '/employee/attendance',
     }
     return <Navigate to={roleRoutes[userRole] || '/employee/attendance'} replace />
