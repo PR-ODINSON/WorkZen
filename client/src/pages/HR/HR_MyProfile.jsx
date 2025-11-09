@@ -513,7 +513,6 @@ export default function HR_MyProfile() {
                     disabled
                     className="w-full bg-gray-100 border border-gray-300 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Same as registered email</p>
                 </div>
 
                 {/* Gender */}
@@ -564,7 +563,6 @@ export default function HR_MyProfile() {
                     disabled
                     className="w-full bg-gray-100 border border-gray-300 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Extracted from employee database</p>
                 </div>
               </div>
 
@@ -660,7 +658,6 @@ export default function HR_MyProfile() {
                       disabled
                       className="w-full bg-gray-100 border border-green-200 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Extracted from employee database</p>
                   </div>
                 </div>
               </div>
