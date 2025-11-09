@@ -2,9 +2,10 @@
 
 A comprehensive Human Resource Management System (HRMS) built with modern technologies.
 
-## 🎥 Demo Video
+## 🎥 Demo Videos
 
-**[Watch the Demo Video Here](https://1drv.ms/v/c/f3ac1200130e71a5/EY794yb-WrVPrpHf5qGStdUBdnAt7gDOqct-M9xLXPNZdA)**
+- **[Web Application Demo](https://1drv.ms/v/c/f3ac1200130e71a5/EY794yb-WrVPrpHf5qGStdUBdnAt7gDOqct-M9xLXPNZdA)** - Full walkthrough of the web interface
+- **[Mobile Application Demo](https://drive.google.com/file/d/1uuAR-RfdLXUS3ssZLMEfJlhK5texhw1K/view?usp=sharing)** - Mobile responsive design showcase
 
 ## 🏗️ Architecture
 
