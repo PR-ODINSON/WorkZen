@@ -191,11 +191,6 @@ class PayrollService {
       return !bankDetails || !bankDetails.accountNumber || !bankDetails.bankName;
     });
     
-    // Find employees without manager
-    const employeesWithoutManager = allEmployees.filter(emp => 
-      !emp.manager || emp.manager.trim() === ''
-    );
-    
     // Get recent payruns (last 6 months for chart)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
@@ -292,12 +287,6 @@ class PayrollService {
     return {
       warnings: {
         employeesWithoutBank: employeesWithoutBank.map(emp => ({
-          id: emp._id,
-          name: emp.name,
-          employeeId: emp.employeeId,
-          email: emp.email
-        })),
-        employeesWithoutManager: employeesWithoutManager.map(emp => ({
           id: emp._id,
           name: emp.name,
           employeeId: emp.employeeId,

@@ -170,7 +170,15 @@ const Navbar = () => {
 
   const handleProfileClick = () => {
     setIsDropdownOpen(false)
-    navigate('/profile')
+    // Navigate based on user role
+    const roleRoutes = {
+      'Admin': '/admin/profile',
+      'HR': '/hr/profile',
+      'Employee': '/employee/profile',
+      'PayrollOfficer': '/payroll/profile'
+    }
+    const profileRoute = roleRoutes[userRole] || '/admin/profile'
+    navigate(profileRoute)
   }
 
   const formatTime = (dateString) => {
