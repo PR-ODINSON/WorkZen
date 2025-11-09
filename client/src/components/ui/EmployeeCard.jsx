@@ -3,29 +3,27 @@ import React from 'react'
 const EmployeeCard = ({ employee, onClick }) => {
   // Determine status indicator
   const getStatusIndicator = () => {
-    switch (employee.status?.toLowerCase()) {
+    const status = employee.status?.toLowerCase();
+    
+    switch (status) {
       case 'present':
         return (
-          <div className="w-3 h-3 bg-green-500 rounded-full" title="Present"></div>
+          <div className="w-3 h-3 bg-green-500 rounded-full shadow-lg" title="Present"></div>
         )
       case 'on leave':
       case 'leave':
         return (
-          <div className="text-blue-500" title="On Leave">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
-              <path d="M9 5h2v5H9V5zm0 6h2v2H9v-2z"/>
-            </svg>
-            ✈️
+          <div className="flex items-center justify-center" title="On Leave">
+            <span className="text-lg">✈️</span>
           </div>
         )
       case 'absent':
         return (
-          <div className="w-3 h-3 bg-yellow-500 rounded-full" title="Absent"></div>
+          <div className="w-3 h-3 bg-yellow-500 rounded-full shadow-lg" title="Absent"></div>
         )
       default:
         return (
-          <div className="w-3 h-3 bg-gray-400 rounded-full" title="Unknown"></div>
+          <div className="w-3 h-3 bg-gray-400 rounded-full shadow-lg" title="Unknown"></div>
         )
     }
   }

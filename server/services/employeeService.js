@@ -1,5 +1,7 @@
 const Employee = require('../models/Employee');
 const User = require('../models/User');
+const Attendance = require('../models/Attendance');
+const Leave = require('../models/Leave');
 const bcrypt = require('bcryptjs');
 const authService = require('./authService');
 const emailService = require('../utils/emailService');
@@ -10,6 +12,7 @@ const emailService = require('../utils/emailService');
 class EmployeeService {
   /**
    * Get all employees with pagination and filters
+   * Includes dynamic status based on today's attendance and leave
    */
   async getAllEmployees(query = {}) {
     const { page = 1, limit = 10, search, department, designation } = query;
@@ -32,10 +35,60 @@ class EmployeeService {
       .skip(skip)
       .sort({ createdAt: -1 });
 
+    // Get today's date range
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Fetch today's attendance for all employees
+    const attendanceRecords = await Attendance.find({
+      date: { $gte: today, $lt: tomorrow }
+    });
+
+    // Fetch approved leaves for today
+    const leaveRecords = await Leave.find({
+      status: 'approved',
+      startDate: { $lte: today },
+      endDate: { $gte: today }
+    });
+
+    // Create maps for quick lookup
+    const attendanceMap = {};
+    attendanceRecords.forEach(record => {
+      attendanceMap[record.empId?.toString()] = record;
+    });
+
+    const leaveMap = {};
+    leaveRecords.forEach(record => {
+      leaveMap[record.empId?.toString()] = record;
+    });
+
+    // Update employee status dynamically
+    const employeesWithStatus = employees.map(emp => {
+      const empObj = emp.toObject();
+      const empId = emp._id.toString();
+      
+      // Check if on approved leave
+      if (leaveMap[empId]) {
+        empObj.status = 'On Leave';
+      }
+      // Check if checked in today
+      else if (attendanceMap[empId] && attendanceMap[empId].checkIn) {
+        empObj.status = 'Present';
+      }
+      // Otherwise absent
+      else {
+        empObj.status = 'Absent';
+      }
+
+      return empObj;
+    });
+
     const total = await Employee.countDocuments(filter);
 
     return {
-      employees,
+      employees: employeesWithStatus,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
