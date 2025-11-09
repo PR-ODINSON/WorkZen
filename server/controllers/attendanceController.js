@@ -49,7 +49,7 @@ exports.checkIn = async (req, res) => {
     
     if (empId) {
       // Employee has an Employee profile, use empId
-      attendance = await attendanceService.checkIn(empId);
+      attendance = await attendanceService.checkIn(empId, userId);
     } else {
       // Employee doesn't have Employee profile yet, use userId
       console.log('No empId found, using userId for check-in');
