@@ -18,4 +18,7 @@ router.put('/private', profileController.updatePrivateInfo);
 // Update resume
 router.put('/resume', profileController.updateResume);
 
+// Change password
+router.put('/change-password', profileController.changePassword);
+
 module.exports = router;

@@ -1,6 +1,7 @@
 const UserProfile = require('../models/UserProfile');
 const Employee = require('../models/Employee');
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const { success, error } = require('../utils/response');
 
 // Get user profile
@@ -120,5 +121,46 @@ exports.updateResume = async (req, res) => {
   } catch (err) {
     console.error('Update resume error:', err);
     error(res, 'Error updating resume', 500);
+  }
+};
+
+// Change password
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    
+    // Validate input
+    if (!oldPassword || !newPassword) {
+      return error(res, 'Old password and new password are required', 400);
+    }
+    
+    if (newPassword.length < 6) {
+      return error(res, 'New password must be at least 6 characters long', 400);
+    }
+    
+    // Find user
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return error(res, 'User not found', 404);
+    }
+    
+    // Verify old password
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return error(res, 'Current password is incorrect', 400);
+    }
+    
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    
+    // Update password
+    user.password = hashedPassword;
+    await user.save();
+    
+    success(res, { message: 'Password changed successfully' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    error(res, 'Error changing password', 500);
   }
 };
