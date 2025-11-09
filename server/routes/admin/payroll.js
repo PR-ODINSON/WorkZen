@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const payrollCtrl = require('../../controllers/admin/payrollController');
-const { verifyToken, adminOnly } = require('../../middlewares/authMiddleware');
+const { verifyToken, allowRoles } = require('../../middlewares/authMiddleware');
 
-// Apply auth middleware to all routes
-router.use(verifyToken, adminOnly);
+// Apply auth middleware to all routes - Allow Admin and PayrollOfficer
+router.use(verifyToken, allowRoles('Admin', 'PayrollOfficer'));
 
 // Dashboard Route
 // GET /api/admin/payroll/dashboard - Get payroll dashboard data

@@ -203,9 +203,7 @@ export default function App() {
 
       {/* ------------------ Payroll Officer Routes ------------------ */}
       {[
-        { path: '/payroll/employees', page: <PayrollOfficer.Employees /> },
         { path: '/payroll/attendance', page: <PayrollOfficer.Attendance /> },
-        { path: '/payroll/timeoff', page: <PayrollOfficer.TimeOff /> },
         { path: '/payroll/payroll', page: <PayrollOfficer.Payroll /> },
         { path: '/payroll/reports', page: <PayrollOfficer.Reports /> },
         { path: '/payroll/profile', page: <PayrollOfficer.MyProfile /> },

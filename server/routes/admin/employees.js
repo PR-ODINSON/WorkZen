@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const empCtrl = require('../../controllers/admin/employeesController');
-const { verifyToken, adminOnly } = require('../../middlewares/authMiddleware');
+const { verifyToken, allowRoles } = require('../../middlewares/authMiddleware');
 
-router.use(verifyToken, adminOnly);
+// Allow Admin and PayrollOfficer to access employee data
+router.use(verifyToken, allowRoles('Admin', 'PayrollOfficer'));
 router.get('/', empCtrl.list);
 router.post('/', empCtrl.create);
 router.get('/:id', empCtrl.get);
