@@ -13,8 +13,7 @@ export default function PayrollDashboard() {
   const [loading, setLoading] = useState(true)
   const [dashboardData, setDashboardData] = useState({
     warnings: {
-      employeesWithoutBank: [],
-      employeesWithoutManager: []
+      employeesWithoutBank: []
     },
     payruns: [],
     monthlyStats: [],
@@ -33,7 +32,7 @@ export default function PayrollDashboard() {
       if (response.success) {
         // The data is spread directly in the response by the backend
         const newDashboardData = {
-          warnings: response.warnings || { employeesWithoutBank: [], employeesWithoutManager: [] },
+          warnings: response.warnings || { employeesWithoutBank: [] },
           payruns: response.payruns || [],
           monthlyStats: response.monthlyStats || [],
           totalEmployees: response.totalEmployees || 0
@@ -71,8 +70,8 @@ export default function PayrollDashboard() {
     )
   }
 
-  const { warnings = { employeesWithoutBank: [], employeesWithoutManager: [] }, payruns = [], monthlyStats = [] } = dashboardData || {}
-  const hasWarnings = warnings.employeesWithoutBank.length > 0 || warnings.employeesWithoutManager.length > 0
+  const { warnings = { employeesWithoutBank: [] }, payruns = [], monthlyStats = [] } = dashboardData || {}
+  const hasWarnings = warnings.employeesWithoutBank.length > 0
 
   return (
     <div className="space-y-6">
@@ -85,27 +84,12 @@ export default function PayrollDashboard() {
               <h3 className="text-lg font-semibold text-yellow-800 mb-4">Warnings</h3>
               
               {warnings.employeesWithoutBank.length > 0 && (
-                <div className="mb-4">
+                <div>
                   <h4 className="font-medium text-yellow-800 mb-2">
                     {warnings.employeesWithoutBank.length} Employee{warnings.employeesWithoutBank.length !== 1 ? 's' : ''} without Bank A/c
                   </h4>
                   <div className="space-y-1">
                     {warnings.employeesWithoutBank.map(emp => (
-                      <div key={emp.id} className="text-sm text-yellow-700">
-                        • {emp.name} ({emp.employeeId}) - {emp.email}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {warnings.employeesWithoutManager.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-yellow-800 mb-2">
-                    {warnings.employeesWithoutManager.length} Employee{warnings.employeesWithoutManager.length !== 1 ? 's' : ''} without Manager
-                  </h4>
-                  <div className="space-y-1">
-                    {warnings.employeesWithoutManager.map(emp => (
                       <div key={emp.id} className="text-sm text-yellow-700">
                         • {emp.name} ({emp.employeeId}) - {emp.email}
                       </div>
