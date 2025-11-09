@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }) => {
       const roleRoutes = {
         'admin': '/admin/employees',
         'hr': '/hr/employees',
-        'payrollofficer': '/payroll/employees',
+        'payrollofficer': '/payroll/attendance',
         'employee': '/employee/attendance',
       }
       

@@ -719,26 +719,10 @@ export default function MyProfile() {
         )}
 
         {activeTab === 'security' && (
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-lg border border-blue-100 p-8">
-            <h3 className="text-2xl font-semibold text-gray-800 mb-6 pb-4 border-b border-blue-100">
-              Change Password
-            </h3>
+          <div className="bg-white rounded-xl shadow-sm p-8">
+            <h3 className="text-2xl font-bold text-gray-800 mb-8">Change Password</h3>
 
-            {/* Success Message */}
-            {passwordSuccess && (
-              <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg relative mb-6">
-                {passwordSuccess}
-              </div>
-            )}
-
-            {/* Error Message */}
-            {passwordError && (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-6">
-                {passwordError}
-              </div>
-            )}
-
-            <form onSubmit={handlePasswordChange} className="space-y-6">
+            <form onSubmit={handlePasswordChange} className="space-y-6 max-w-2xl">
               {/* Login ID (Read-only) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -748,7 +732,7 @@ export default function MyProfile() {
                   type="text"
                   value={userDetails?.loginId || user?.loginId || ''}
                   disabled
-                  className="w-full bg-gray-100 border border-blue-200 px-4 py-2 rounded-lg text-sm cursor-not-allowed"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
                 />
               </div>
 
@@ -761,7 +745,7 @@ export default function MyProfile() {
                   type="password"
                   value={passwordData.oldPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
-                  className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   placeholder="Enter your current password"
                   required
                 />
@@ -776,7 +760,7 @@ export default function MyProfile() {
                   type="password"
                   value={passwordData.newPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                  className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   placeholder="Enter new password (min. 6 characters)"
                   required
                   minLength="6"
@@ -792,20 +776,34 @@ export default function MyProfile() {
                   type="password"
                   value={passwordData.confirmPassword}
                   onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                  className="w-full bg-white border border-blue-200 px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                   placeholder="Re-enter new password"
                   required
                 />
               </div>
+
+              {/* Error Message */}
+              {passwordError && (
+                <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+                  {passwordError}
+                </div>
+              )}
+
+              {/* Success Message */}
+              {passwordSuccess && (
+                <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-lg">
+                  {passwordSuccess}
+                </div>
+              )}
 
               {/* Submit Button */}
               <div className="flex justify-end pt-4">
                 <button
                   type="submit"
                   disabled={changingPassword}
-                  className="px-8 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg hover:from-blue-600 hover:to-indigo-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {changingPassword ? 'Resetting Password...' : 'Reset Password'}
+                  {changingPassword ? 'Resetting...' : 'Reset Password'}
                 </button>
               </div>
             </form>

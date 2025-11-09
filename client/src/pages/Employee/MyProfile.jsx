@@ -38,6 +38,12 @@ export default function EmployeeProfile() {
     }
   })
   const [editingPrivateInfo, setEditingPrivateInfo] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    oldPassword: '', newPassword: '', confirmPassword: ''
+  })
+  const [passwordSuccess, setPasswordSuccess] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [changingPassword, setChangingPassword] = useState(false)
 
   // Fetch profile data on mount
   useEffect(() => {
@@ -205,6 +211,46 @@ export default function EmployeeProfile() {
         ...prev,
         [field]: value
       }))
+    }
+  }
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    setPasswordError('')
+    setPasswordSuccess('')
+
+    // Validate fields
+    if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+      setPasswordError('All fields are required')
+      return
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setPasswordError('New password must be at least 6 characters long')
+      return
+    }
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setPasswordError('New password and confirm password do not match')
+      return
+    }
+
+    try {
+      setChangingPassword(true)
+      const response = await api.put('/profile/change-password', {
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword
+      })
+
+      if (response.data.success) {
+        setPasswordSuccess('Password changed successfully!')
+        setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' })
+        setTimeout(() => setPasswordSuccess(''), 5000)
+      }
+    } catch (error) {
+      setPasswordError(error.response?.data?.message || 'Failed to change password. Please try again.')
+    } finally {
+      setChangingPassword(false)
     }
   }
 
@@ -667,8 +713,94 @@ export default function EmployeeProfile() {
             )}
 
             {activeTab === 'security' && (
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 shadow-sm text-gray-600">
-                <p>Security settings and password update tools will appear here.</p>
+              <div className="bg-white rounded-xl shadow-sm p-8">
+                <h3 className="text-2xl font-bold text-gray-800 mb-8">Change Password</h3>
+                
+                <form onSubmit={handlePasswordChange} className="space-y-6 max-w-2xl">
+                  {/* Login ID (Read-only) */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Login ID
+                    </label>
+                    <input
+                      type="text"
+                      value={userDetails?.loginId || profile?.userId?.loginId || ''}
+                      disabled
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-700 cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Old Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Old Password <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.oldPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, oldPassword: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      placeholder="Enter your current password"
+                      required
+                    />
+                  </div>
+
+                  {/* New Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      New Password <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      placeholder="Enter new password (min. 6 characters)"
+                      minLength={6}
+                      required
+                    />
+                  </div>
+
+                  {/* Confirm Password */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Confirm Password <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                      placeholder="Re-enter new password"
+                      required
+                    />
+                  </div>
+
+                  {/* Error Message */}
+                  {passwordError && (
+                    <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+                      {passwordError}
+                    </div>
+                  )}
+
+                  {/* Success Message */}
+                  {passwordSuccess && (
+                    <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-lg">
+                      {passwordSuccess}
+                    </div>
+                  )}
+
+                  {/* Submit Button */}
+                  <div className="flex justify-end pt-4">
+                    <button
+                      type="submit"
+                      disabled={changingPassword}
+                      className="px-8 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {changingPassword ? 'Resetting...' : 'Reset Password'}
+                    </button>
+                  </div>
+                </form>
               </div>
             )}
           </div>
